@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Phan Văn Nhựt - Trình Quản Lý & Thiết Kế Lịch Tập Học Viên (DeltaBolic Form Support)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Chosen Palette: Warm Slate & Emerald Fitness with Gold Coach Accent (Background #f8fafc, Cards #ffffff, Primary Emerald #10b981, Indigo #6366f1, Accent Gold #f59e0b) -->
+    <!-- Application Structure Plan: Interactive workout schedule builder designed for Coach Phan Văn Nhựt to create, customize, and assign 6-day weekly workout programs to students. Features direct exercise form tutorial links integrated with YouTube channel Andrew Kwong (DeltaBolic) for clean, high-precision visual form cues. -->
+    <!-- Visualization & Content Choices:
+        - Coach Branding & Student Info Header -> Goal: PT identity & customized client profile -> Dynamic HTML inputs and badge headers.
+        - DeltaBolic (Andrew Kwong) YouTube Instruction Links -> Goal: Provide high quality exercise form guidance -> Direct DeltaBolic search/shorts fallback & custom link editing.
+        - Custom Confirm Modal -> Goal: Prevent sandbox popup blocking issues when deleting -> Custom Tailwind UI modal.
+        - Interactive Day Tabs & Exercise Table -> Goal: Comprehensive exercise program editing -> Dynamic JS DOM rendering with inline editing, add modal, edit modal, and delete triggers.
+        - Muscle Volume Radar Chart -> Goal: Visualize weekly volume balance across muscle groups -> Chart.js Radar Chart canvas with responsive wrapper.
+        - Nutrition & Recovery Calculator -> Goal: Auto calculate protein and water targets -> Dynamic JS formulas based on weight and fitness goal.
+        - Export / Share Summary -> Goal: Easy Zalo/Facebook client distribution -> Structured text generator with DeltaBolic YouTube tutorial links & Coach Phan Văn Nhựt signature.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header & Navigation -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-emerald-500 text-slate-950 font-black text-xl rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    PVN
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-extrabold uppercase tracking-widest text-emerald-400">Personal Trainer System</span>
+                        <span class="bg-amber-400/20 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-400/30">Coach Phan Văn Nhựt</span>
+                    </div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">
+                        Trình Thiết Kế Lịch Tập Học Viên (Tích Hợp Video Form DeltaBolic)
+                    </h1>
+                </div>
+            </div>
+            
+            <!-- Option Selector Tabs -->
+            <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700 self-start md:self-auto">
+                <button id="btn-option1" onclick="switchOption('option1')" class="px-3.5 py-2 text-xs font-bold rounded-lg transition-all shadow-sm bg-emerald-500 text-slate-950">
+                    Phương Án 1: 6 Buổi Gym (PPL x 2)
+                </button>
+                <button id="btn-option2" onclick="switchOption('option2')" class="px-3.5 py-2 text-xs font-bold rounded-lg transition-all text-slate-300 hover:text-white">
+                    Phương Án 2: 3 Gym + 3 Cardio
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-8">
+
+        <!-- Student Profile Card -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🎓</span>
+                    <div>
+                        <h2 class="text-base font-bold text-slate-800">Thông Tin Hồ Sơ Học Viên</h2>
+                        <p class="text-xs text-slate-500">Coach nhập thông tin học viên để cá nhân hóa giáo trình huấn luyện</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-semibold">
+                    <span>👑 HLV Phụ Trách:</span>
+                    <span class="font-extrabold">Coach Phan Văn Nhựt</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                <span class="text-xs font-semibold text-slate-600">👤 Học viên đang chọn:</span>
+                <select id="student-selector" onchange="switchStudent(this.value)" class="px-3 py-1.5 text-xs font-bold border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                <button onclick="createNewStudentPrompt()" class="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all">➕ Học Viên Mới</button>
+                <button onclick="deleteCurrentStudentConfirm()" class="px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 rounded-lg transition-all">🗑️ Xóa Học Viên Này</button>
+                <button onclick="exportBackup()" class="px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-all">⬇️ Sao Lưu Dữ Liệu</button>
+                <button onclick="document.getElementById('backup-file-input').click()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-all">⬆️ Khôi Phục Từ File</button>
+                <input type="file" id="backup-file-input" accept=".json,application/json" class="hidden" onchange="importBackup(event)">
+                <span class="text-[10px] text-slate-400 ml-auto">💾 Tự động lưu trên trình duyệt này · nên sao lưu định kỳ</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tên Học Viên:</label>
+                    <input type="text" id="student-name" value="Nguyễn Văn A" oninput="updateStudentHeader()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Giới Tính:</label>
+                    <select id="student-gender" onchange="syncProfileFromUI()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="male" selected>Nam</option>
+                        <option value="female">Nữ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Mục Tiêu Huấn Luyện:</label>
+                    <select id="student-goal" onchange="updateStudentHeader(); calculateNutrition();" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="gain" selected>Tăng Cơ Bắp (Hypertrophy / Bulking)</option>
+                        <option value="lose">Giảm Mỡ Duy Trì Cơ (Fat Loss / Cutting)</option>
+                        <option value="recomp">Tăng Cơ Giảm Mỡ Đồng Thời (Body Recomp)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Cân Nặng Ban Đầu (kg):</label>
+                    <input type="number" id="student-weight" value="68" min="30" max="150" oninput="calculateNutrition()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Ngày Bắt Đầu / Tuần Số:</label>
+                    <input type="text" id="student-start-date" value="Tuần 01 - Tháng 09/2026" onchange="syncProfileFromUI()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Chiều Cao (cm):</label>
+                    <input type="number" id="student-height" min="100" max="230" placeholder="VD: 165" oninput="onBodyStatsChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tuổi:</label>
+                    <input type="number" id="student-age" min="14" max="90" placeholder="VD: 25" oninput="onBodyStatsChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <p class="col-span-2 lg:col-span-3 self-end text-[11px] text-slate-400">Nhập chiều cao và tuổi để tính calo chính xác hơn theo giới tính (công thức Mifflin-St Jeor).</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 bg-pink-50 border border-pink-200 rounded-xl p-3">
+                <p class="text-[11px] text-pink-700 flex-1">
+                    🎯 Với học viên <b>Nữ</b>, bấm nút này để tự động tăng khối lượng nhóm <b>Mông</b> & <b>Lưng/Xô</b>, giảm bớt Ngực/Vai và thêm bài tập bổ trợ (Cable Glute Kickback, Straight-Arm Pulldown) cho cả 2 phương án lịch tập.
+                </p>
+                <button onclick="applyGenderFocus()" class="px-3 py-1.5 text-xs font-semibold text-white bg-pink-600 hover:bg-pink-700 rounded-lg transition-all whitespace-nowrap">
+                    🎯 Áp Dụng Tinh Chỉnh Theo Giới Tính
+                </button>
+            </div>
+            
+            <div class="pt-2">
+                <label class="block font-semibold text-slate-700 mb-1 text-xs">Lời Nhắn & Chỉ Đạo Từ Coach Phan Văn Nhựt:</label>
+                <input type="text" id="coach-special-note" value="Mở link YouTube đính kèm từng bài để xem clip mô phỏng form chuẩn từ Andrew Kwong (DeltaBolic) trước khi tập!" oninput="syncProfileFromUI()" placeholder="Nhập chỉ đạo riêng cho học viên..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+        </section>
+
+        <!-- Program Overview Section -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                <div class="lg:col-span-2 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span id="plan-badge" class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full uppercase tracking-wider">
+                            Hypertrophy Focus
+                        </span>
+                        <span class="text-xs text-slate-400">| Tần suất 6 buổi/tuần</span>
+                        <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">Giáo trình bởi Coach Phan Văn Nhựt</span>
+                    </div>
+                    <h2 id="plan-title" class="text-xl font-extrabold text-slate-800">
+                        Phương Án 1: Lịch Tập 6 Buổi Gym Chuyên Sâu (Push - Pull - Legs x 2)
+                    </h2>
+                    <p id="plan-desc" class="text-slate-600 text-sm leading-relaxed">
+                        Mục tiêu chính là tối ưu hóa việc kích thích phát triển cơ bắp (Hypertrophy), phân bổ đều các nhóm cơ 2 lần mỗi tuần với chu kỳ lặp lại giúp cơ bắp phục hồi và phát triển đồng đều.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="block text-xs text-slate-400 font-medium">Tổng bài tập</span>
+                            <span id="stat-total-ex" class="text-lg font-bold text-slate-800">31 Bài</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="block text-xs text-slate-400 font-medium">Tổng Sets/Tuần</span>
+                            <span id="stat-total-sets" class="text-lg font-bold text-slate-800">108 Sets</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="block text-xs text-slate-400 font-medium">Buổi Gym</span>
+                            <span id="stat-gym-days" class="text-lg font-bold text-emerald-600">6 Buổi</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="block text-xs text-slate-400 font-medium">Buổi Cardio</span>
+                            <span id="stat-cardio-days" class="text-lg font-bold text-indigo-600">0 Buổi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Volume Distribution Chart Container -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col items-center">
+                    <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 text-center">
+                        📊 Phân Bổ Tải Trọng & Nhóm Cơ (Sets/Tuần)
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Weekly Planner & Editor -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <!-- Section Header & Day Actions -->
+            <div class="p-6 border-b border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span>🗓️</span> Chi Tiết Lịch Tập Cho Học Viên <span id="header-student-name" class="text-emerald-600 font-extrabold">[Nguyễn Văn A]</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Coach chọn từng ngày để chỉnh sửa bài tập, dán link YouTube kỹ thuật của DeltaBolic (Andrew Kwong) hoặc điều chỉnh mức tạ.
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="resetCurrentOption()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-all flex items-center gap-1 shadow-sm">
+                        <span>🔄</span> Khôi Phục Mặc Định
+                    </button>
+                    <button onclick="clearDayExercises()" class="px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="Xóa tất cả bài tập trong ngày này">
+                        <span>🗑️</span> Xóa Sạch Ngày Này
+                    </button>
+                    <button onclick="openAddExerciseModal()" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all shadow-sm flex items-center gap-1">
+                        <span>➕</span> Thêm Bài Tập Mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Day Navigation Buttons -->
+            <div class="px-6 pt-4 border-b border-slate-200 overflow-x-auto custom-scrollbar">
+                <div class="flex gap-2 min-w-max pb-3" id="day-tabs-container">
+                    <!-- Day tabs rendered via JS -->
+                </div>
+            </div>
+
+            <!-- Day Detail Content Grid -->
+            <div class="p-6">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Left Column: Exercises Table/List -->
+                    <div class="lg:w-2/3 space-y-4">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <h4 id="current-day-name" class="text-base font-bold text-slate-800">Thứ 2 - Push A</h4>
+                                <span id="current-day-focus" class="text-xs text-emerald-600 font-medium">Ngực - Vai - Tay sau (Sức mạnh)</span>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="current-day-count" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">5 Bài tập</span>
+                                <button id="btn-complete-today" onclick="toggleTodayCompletion()" class="px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1 border border-slate-300 bg-white hover:bg-slate-50">
+                                    <span id="complete-today-icon">⬜</span> Đã tập hôm nay
+                                </button>
+                                <button onclick="openAddExerciseModal()" class="px-3 py-1 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all shadow-sm flex items-center gap-1">
+                                    <span>➕</span> Thêm bài tập
+                                </button>
+                            </div>
+                        </div>
+                        <div id="day-complete-count" class="text-[10px] text-slate-400 -mt-2"></div>
+
+                        <!-- Exercises List Table -->
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase font-semibold border-b border-slate-200">
+                                        <th class="py-3 px-4">Tên Bài Tập</th>
+                                        <th class="py-3 px-3 text-center">Sets</th>
+                                        <th class="py-3 px-3 text-center">Reps / Thời Gian</th>
+                                        <th class="py-3 px-3 text-center">Mức Tạ (kg)</th>
+                                        <th class="py-3 px-3 text-center">Form (DeltaBolic)</th>
+                                        <th class="py-3 px-3 text-center">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="exercise-list-tbody" class="divide-y divide-slate-100">
+                                    <!-- Dynamic rows generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Action Buttons below table -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                            <button onclick="openAddExerciseModal()" class="py-2.5 border-2 border-dashed border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/50 text-emerald-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5">
+                                <span>➕</span> Thêm bài tập mới vào <span id="add-btn-day-label" class="underline">ngày này</span>
+                            </button>
+                            <button onclick="clearDayExercises()" class="py-2.5 border border-rose-200 bg-rose-50/40 hover:bg-rose-100/60 text-rose-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5">
+                                <span>🗑️</span> Xóa toàn bộ bài tập trong <span id="clear-btn-day-label" class="underline">ngày này</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Notes & Daily Tips -->
+                    <div class="lg:w-1/3 bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4">
+                        <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-200 pb-2">
+                            <span>💡</span> Hướng Dẫn Kỹ Thuật Từ Coach Phan Văn Nhựt
+                        </h4>
+                        
+                        <div id="day-notes-box" class="text-xs text-slate-600 space-y-2 leading-relaxed">
+                            <!-- Dynamic notes rendered here -->
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-200">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Ghi Chú Phản Hồi Từ Học Viên:</label>
+                            <textarea id="user-day-memo" onchange="saveDayMemo()" rows="3" placeholder="Học viên phản hồi mức tạ thực tế, cảm giác cơ hoặc khó khăn gặp phải..." class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"></textarea>
+                            <span id="memo-saved-toast" class="text-[10px] text-emerald-600 hidden font-medium">✓ Đã tự động lưu ghi chú học viên</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weekly Progress Tracking -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span>📈</span> Theo Dõi Tiến Độ Hàng Tuần
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Ghi lại cân nặng & tổng tạ 3 bài compound chính (Squat/Bench/Deadlift) mỗi tuần để theo dõi tiến bộ của học viên.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Cân nặng tuần này (kg):</label>
+                        <input type="number" id="log-weight" step="0.1" min="30" max="150" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tổng tạ 3 bài chính (kg):</label>
+                        <input type="number" id="log-compound" placeholder="Squat + Bench + Deadlift" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Ghi chú tuần:</label>
+                        <input type="text" id="log-note" placeholder="Cảm nhận, khó khăn..." class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <button onclick="saveWeeklyLog()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-all">💾 Lưu Số Đo Tuần Này</button>
+                </div>
+                <div class="lg:col-span-2 space-y-3">
+                    <div class="chart-container" style="height:220px;max-height:260px;">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                    <div id="weekly-log-list" class="max-h-40 overflow-y-auto custom-scrollbar text-xs divide-y divide-slate-100 border border-slate-200 rounded-lg"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Adherence -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="border-b border-slate-200 pb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><span>✅</span> Chuyên Cần Tập Luyện</h3>
+                <p class="text-xs text-slate-500 mt-1">Tính theo số ngày học viên đã đánh dấu hoàn thành buổi tập (mỗi tuần tính từ Thứ 2), mục tiêu 6 buổi/tuần.</p>
+            </div>
+            <div id="adh-summary" class="text-xs"></div>
+            <div class="flex flex-wrap items-end gap-2 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Quên đánh dấu? Chọn buổi tập:</label>
+                    <select id="adh-day" class="px-3 py-2 border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Ngày đã tập:</label>
+                    <input type="date" id="adh-date" class="px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <button onclick="toggleCompletionOnDate()" class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-all">Thêm / Bỏ đánh dấu ngày này</button>
+            </div>
+        </section>
+
+        <!-- Lift progression -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><span>🏋️</span> Theo Dõi Mức Tạ Từng Bài</h3>
+                <p class="text-xs text-slate-500 mt-1">Ghi mức tạ tốt nhất của từng bài theo ngày để thấy rõ tiến bộ (progressive overload).</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Bài tập:</label>
+                        <input type="text" id="lift-exercise" list="lift-names" onfocus="refreshLiftNames()" placeholder="Gõ để chọn, VD: Hip Thrust" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                        <datalist id="lift-names"></datalist>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Mức tạ (kg):</label>
+                            <input type="number" id="lift-weight" step="0.5" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Số reps:</label>
+                            <input type="number" id="lift-reps" min="1" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Ngày:</label>
+                        <input type="date" id="lift-date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <button onclick="saveLiftLog()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-all">💾 Ghi Mức Tạ</button>
+                </div>
+                <div class="lg:col-span-2 space-y-3">
+                    <select id="lift-chart-select" onchange="updateLiftChart()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                    <div class="chart-container" style="height:200px;max-height:240px;"><canvas id="liftChart"></canvas></div>
+                    <div id="lift-summary" class="text-xs space-y-1"></div>
+                    <div id="lift-log-list" class="max-h-36 overflow-y-auto custom-scrollbar text-xs divide-y divide-slate-100 border border-slate-200 rounded-lg"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Body measurements -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><span>📏</span> Số Đo Vòng Cơ Thể</h3>
+                <p class="text-xs text-slate-500 mt-1">Theo dõi vòng mông, eo, đùi, ngực, tay (cm). Chỉ cần nhập những vòng đã đo, để trống vòng nào chưa đo.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Ngày đo:</label>
+                        <input type="date" id="ms-date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="block font-semibold text-slate-700 mb-1">Mông/Hông:</label><input type="number" id="ms-hip" step="0.1" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div><label class="block font-semibold text-slate-700 mb-1">Eo:</label><input type="number" id="ms-waist" step="0.1" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div><label class="block font-semibold text-slate-700 mb-1">Đùi:</label><input type="number" id="ms-thigh" step="0.1" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div><label class="block font-semibold text-slate-700 mb-1">Ngực:</label><input type="number" id="ms-chest" step="0.1" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div class="col-span-2"><label class="block font-semibold text-slate-700 mb-1">Tay:</label><input type="number" id="ms-arm" step="0.1" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                    </div>
+                    <button onclick="saveMeasurement()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-all">💾 Lưu Số Đo</button>
+                </div>
+                <div class="lg:col-span-2 space-y-3">
+                    <div class="chart-container" style="height:220px;max-height:260px;"><canvas id="measureChart"></canvas></div>
+                    <div id="ms-summary" class="flex flex-wrap gap-2 text-xs"></div>
+                    <div id="ms-log-list" class="max-h-36 overflow-y-auto custom-scrollbar text-xs divide-y divide-slate-100 border border-slate-200 rounded-lg"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Nutrition & Recovery Calculator -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span>🥗</span> Khuyến Nghị Dinh Dưỡng Dành Cho Học Viên
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Công cụ tự động tính toán nhu cầu Protein và nước uống dựa trên cân nặng và mục tiêu do Coach Phan Văn Nhựt đề ra.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Summary Card -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                    <div class="font-bold text-slate-800 text-sm">Thông Số Học Viên:</div>
+                    <div class="flex justify-between py-1 border-b border-slate-200">
+                        <span class="text-slate-500">Học viên:</span>
+                        <span id="calc-student-disp" class="font-bold text-slate-800">Nguyễn Văn A</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-200">
+                        <span class="text-slate-500">Cân nặng:</span>
+                        <span id="calc-weight-disp" class="font-bold text-slate-800">68 kg</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-200">
+                        <span class="text-slate-500">Mục tiêu:</span>
+                        <span id="calc-goal-disp" class="font-bold text-emerald-600">Tăng Cơ Bắp</span>
+                    </div>
+                    <div class="pt-1 text-[11px] text-slate-500">
+                        * Tỷ lệ được tối ưu hóa cho lịch tập cường độ 6 buổi/tuần.
+                    </div>
+                </div>
+
+                <!-- Results Grid Column -->
+                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-emerald-800 uppercase tracking-wider block">Protein Cần Thiết</span>
+                            <span id="res-protein" class="text-2xl font-extrabold text-emerald-700 mt-1 block">122 - 150 g</span>
+                        </div>
+                        <p class="text-[11px] text-emerald-600 mt-2">Đảm bảo tổng hợp cơ tối ưu cho học viên.</p>
+                    </div>
+
+                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-blue-800 uppercase tracking-wider block">Lượng Nước Khuyên Dùng</span>
+                            <span id="res-water" class="text-2xl font-extrabold text-blue-700 mt-1 block">2.7 - 3.4 Lít</span>
+                        </div>
+                        <p class="text-[11px] text-blue-600 mt-2">Duy trì trạng thái hydrated cho các buổi tập.</p>
+                    </div>
+
+                    <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-amber-800 uppercase tracking-wider block">Giấc Ngủ Phục Hồi</span>
+                            <span class="text-2xl font-extrabold text-amber-700 mt-1 block">7.5 - 8.5 Tiếng</span>
+                        </div>
+                        <p class="text-[11px] text-amber-600 mt-2">Yếu tố quyết định để cơ bắp hồi phục tốt nhất.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auto Meal Plan by Calories -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div class="border-b border-slate-200 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><span>🍽️</span> Giáo Án Bữa Ăn Tự Động Theo Calo</h3>
+                    <p class="text-xs text-slate-500 mt-1">Ước tính calo mục tiêu & gợi ý phân bổ bữa ăn dựa trên cân nặng, mục tiêu và mức vận động.</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <select id="meal-activity" onchange="calculateMealPlan()" class="px-2 py-1.5 border border-slate-300 rounded-lg font-semibold outline-none">
+                        <option value="light">Ít vận động ngoài giờ gym</option>
+                        <option value="moderate" selected>Vận động vừa</option>
+                        <option value="high">Vận động nhiều</option>
+                    </select>
+                    <select id="meal-count" onchange="calculateMealPlan()" class="px-2 py-1.5 border border-slate-300 rounded-lg font-semibold outline-none">
+                        <option value="3">3 bữa/ngày</option>
+                        <option value="4" selected>4 bữa/ngày</option>
+                        <option value="5">5 bữa/ngày</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <span class="block text-slate-500 font-medium">TDEE Ước Tính</span>
+                    <span id="res-tdee" class="text-xl font-extrabold text-slate-800">-- kcal</span>
+                </div>
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <span class="block text-amber-700 font-medium">Calo Mục Tiêu/Ngày</span>
+                    <span id="res-target-cal" class="text-xl font-extrabold text-amber-700">-- kcal</span>
+                </div>
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                    <span class="block text-emerald-700 font-medium">Protein Mục Tiêu</span>
+                    <span id="res-protein-2" class="text-xl font-extrabold text-emerald-700">-- g</span>
+                </div>
+            </div>
+            <div id="meal-plan-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs"></div>
+            <p id="meal-method-note" class="text-[11px] text-slate-500"></p>
+            <p class="text-[10px] text-slate-400">* Ước tính tham khảo, không thay thế tư vấn dinh dưỡng chuyên sâu.</p>
+        </section>
+
+        <!-- Core Training Principles from Coach -->
+        <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <span>📌</span> 3 Nguyên Tắc Cốt Lõi Từ Coach Phan Văn Nhựt
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-1.5">
+                        <span class="text-emerald-600">1.</span> Xem Clip Form DeltaBolic (Andrew Kwong)
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        Ưu tiên hàng đầu là chuẩn kỹ thuật. Trước khi gánh tạ, học viên bấm nút **▶️ DeltaBolic** ở từng bài để xem clip minh họa trực quan từ Andrew Kwong!
+                    </p>
+                </div>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-1.5">
+                        <span class="text-emerald-600">2.</span> Tăng Tiến Tải Trọng An Toàn (Progressive Overload)
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        Chỉ tăng tạ hoặc tăng reps khi đã làm chủ được form kỹ thuật. Luôn ghi lại kết quả tạ vào ứng dụng để báo cáo cho Coach.
+                    </p>
+                </div>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-1.5">
+                        <span class="text-emerald-600">3.</span> Nghỉ Ngơi Complete Ngày Chủ Nhật
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        Chủ nhật là ngày dành riêng cho hệ thần kinh và cơ bắp hồi phục. Tuân thủ dinh dưỡng đủ Protein và ngủ sâu giấc.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary Export / Copy Bar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-slate-900 text-white rounded-2xl shadow-xl border border-slate-800">
+            <div class="text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-amber-400 text-slate-950 font-black text-[10px] rounded uppercase">Coach Phan Văn Nhựt</span>
+                    <p class="font-bold text-sm">Xuất Giáo Trình Kèm Link Form DeltaBolic (Andrew Kwong)</p>
+                </div>
+                <p class="text-slate-400 mt-1">Sao chép hoặc in bản giáo trình đầy đủ (lịch tập kèm link video DeltaBolic, giáo án bữa ăn theo gam, tiến độ tuần) gửi cho học viên qua Zalo / Facebook.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="exportPlanSummary()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-1.5">
+                    <span>📋</span> Sao Chép Giáo Trình Gửi Học Viên
+                </button>
+                <button onclick="printPlan()" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5">
+                    <span>🖨️</span> In / Lưu PDF
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Form: Add / Edit Exercise -->
+    <div id="exercise-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <h3 id="modal-title" class="font-bold text-slate-800 text-base">Thêm Bài Tập Mới</h3>
+                <button onclick="closeExerciseModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            </div>
+
+            <form id="exercise-form" onsubmit="handleSaveExercise(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="modal-edit-index" value="-1">
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">💡 Gợi Ý Bài Tập Theo Nhóm Cơ (tuỳ chọn):</label>
+                    <select id="modal-ex-suggest" onchange="applyExerciseSuggestion(this.value)" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <option value="">— Chọn nhanh từ thư viện bài tập —</option>
+                    </select>
+                    <p class="text-[10px] text-slate-400 mt-1">* Chọn sẽ tự điền Tên Bài Tập & Nhóm Cơ bên dưới, bạn vẫn có thể sửa lại tự do.</p>
+                </div>
+                
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tên Bài Tập:</label>
+                    <input type="text" id="modal-ex-name" required placeholder="Ví dụ: Barbell Bench Press" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Nhóm Cơ Cốt Lõi:</label>
+                        <select id="modal-ex-group" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="Ngực">Ngực</option>
+                            <option value="Vai">Vai</option>
+                            <option value="Lưng / Xô">Lưng / Xô</option>
+                            <option value="Đùi / Mông">Đùi / Mông</option>
+                            <option value="Tay">Tay</option>
+                            <option value="Bụng">Bụng</option>
+                            <option value="Cardio">Cardio</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Số Sets:</label>
+                        <input type="number" id="modal-ex-sets" min="1" max="10" value="3" required class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Số Reps / Thời gian:</label>
+                        <input type="text" id="modal-ex-reps" value="8 - 10 reps" required placeholder="8 - 10 reps hoặc 45 phút" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Mức Tạ Mục Tiêu (kg):</label>
+                        <input type="text" id="modal-ex-weight" value="Tùy chỉnh" placeholder="Ví dụ: 50kg hoặc N/A" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                        <span class="text-rose-600">▶️</span> Link Video DeltaBolic (Andrew Kwong):
+                    </label>
+                    <input type="url" id="modal-ex-youtube" placeholder="https://www.youtube.com/watch?v=... (Để trống tự tạo link DeltaBolic)" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-xs">
+                    <p class="text-[10px] text-slate-400 mt-1">* Dán trực tiếp đường link video Shorts hoặc Video DeltaBolic hướng dẫn bài tập này.</p>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                    <!-- Delete Button inside Modal -->
+                    <button type="button" id="modal-btn-delete" onclick="deleteCurrentExerciseFromModal()" class="px-3 py-2 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg font-semibold flex items-center gap-1 transition-all hidden">
+                        <span>🗑️</span> Xóa bài này
+                    </button>
+                    
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button type="button" onclick="closeExerciseModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-semibold hover:bg-slate-200">Hủy</button>
+                        <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700">Lưu Bài Tập</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center space-y-4">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                🗑️
+            </div>
+            <div>
+                <h3 id="confirm-title" class="font-bold text-slate-800 text-base">Xác Nhận Xóa</h3>
+                <p id="confirm-msg" class="text-xs text-slate-500 mt-1 leading-relaxed">Bạn có chắc chắn muốn thực hiện thao tác này không?</p>
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-2">
+                <button onclick="closeConfirmModal()" class="w-1/2 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all">
+                    Hủy Bỏ
+                </button>
+                <button id="confirm-action-btn" onclick="executeConfirmAction()" class="w-1/2 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl transition-all shadow-sm">
+                    Xác Nhận Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-msg" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl hidden z-50 flex items-center gap-2 border border-slate-700">
+        <span>✅</span> <span id="toast-text">Đã lưu thay đổi thành công!</span>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script>
+        // Preset Datasets with Andrew Kwong (DeltaBolic) YouTube links & search triggers
+        const defaultDataOption1 = {
+            id: 'option1',
+            badge: 'Hypertrophy Focus',
+            title: 'Phương Án 1: Lịch Tập 6 Buổi Gym Chuyên Sâu (Push - Pull - Legs x 2)',
+            desc: 'Mục tiêu tối ưu hóa việc phát triển cơ bắp (Hypertrophy), phân bổ đều các nhóm cơ 2 lần/tuần giúp phục hồi và kích thích phát triển đồng đều.',
+            days: [
+                {
+                    id: 'd1', dayName: 'Thứ 2', title: 'Push A (Ngực - Vai - Tay sau)', focus: 'Sức mạnh / Nặng',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Tập trung bài biến thể Compound nặng đầu buổi. Hãy mở video DeltaBolic (Andrew Kwong) xem đúng kỹ thuật hãm tạ trước khi gánh nặng.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Barbell Bench Press (Đẩy ngực ngang)', group: 'Ngực', sets: 4, reps: '6 - 8 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Barbell+Bench+Press' },
+                        { name: 'Overhead Press (Đẩy vai đứng)', group: 'Vai', sets: 3, reps: '8 - 10 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Overhead+Press' },
+                        { name: 'Incline Dumbbell Press (Đẩy ngực trên)', group: 'Ngực', sets: 3, reps: '10 - 12 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Incline+Dumbbell+Press' },
+                        { name: 'Cable Lateral Raise (Banh vai cáp)', group: 'Vai', sets: 4, reps: '12 - 15 reps', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Cable+Lateral+Raise' },
+                        { name: 'Triceps Rope Pushdown (Tay sau cáp)', group: 'Tay', sets: 3, reps: '12 - 15 reps', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Triceps+Rope+Pushdown' }
+                    ]
+                },
+                {
+                    id: 'd2', dayName: 'Thứ 3', title: 'Pull A (Lưng - Xô - Tay trước)', focus: 'Độ dày lưng & Sức kéo',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Chú ý siết cơ lưng ở đỉnh động tác. Xem video DeltaBolic về bài Deadlift/RDL kỹ để bảo vệ đốt sống thắt lưng.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Barbell Deadlift / RDL', group: 'Lưng / Xô', sets: 3, reps: '6 - 8 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Barbell+Deadlift' },
+                        { name: 'Barbell Bent-Over Row (Chèo thuyền)', group: 'Lưng / Xô', sets: 4, reps: '8 - 10 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Bent+Over+Row' },
+                        { name: 'Lat Pulldown (Kéo xô máy)', group: 'Lưng / Xô', sets: 3, reps: '10 - 12 reps', weight: 'Machine', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Lat+Pulldown' },
+                        { name: 'Face Pull (Kéo cáp vai sau)', group: 'Vai', sets: 4, reps: '15 reps', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Face+Pull' },
+                        { name: 'Barbell Bicep Curl (Cuốn tay trước)', group: 'Tay', sets: 3, reps: '10 - 12 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Bicep+Curl' }
+                    ]
+                },
+                {
+                    id: 'd3', dayName: 'Thứ 4', title: 'Legs A (Đùi - Mông - Bụng)', focus: 'Thiên về Đùi Trước',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Squat sâu chuẩn form. Xem video Andrew Kwong để đảm bảo gối không bị sụp vào trong khi đi lên.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Barbell Back Squat (Gánh đùi)', group: 'Đùi / Mông', sets: 4, reps: '6 - 8 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Barbell+Squat' },
+                        { name: 'Bulgarian Split Squat', group: 'Đùi / Mông', sets: 3, reps: '10 - 12 reps/chân', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Bulgarian+Split+Squat' },
+                        { name: 'Leg Extension (Đá đùi máy)', group: 'Đùi / Mông', sets: 3, reps: '12 - 15 reps', weight: 'Machine', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Leg+Extension' },
+                        { name: 'Lying Leg Curl (Móc đùi sau)', group: 'Đùi / Mông', sets: 3, reps: '12 - 15 reps', weight: 'Machine', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Lying+Leg+Curl' },
+                        { name: 'Calf Raise (Nhón bắp chân)', group: 'Đùi / Mông', sets: 4, reps: '15 - 20 reps', weight: 'Bodyweight', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Calf+Raise' },
+                        { name: 'Hanging Leg Raise (Gập bụng đu xà)', group: 'Bụng', sets: 3, reps: '15 reps', weight: 'Bodyweight', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Hanging+Leg+Raise' }
+                    ]
+                },
+                {
+                    id: 'd4', dayName: 'Thứ 5', title: 'Push B (Ngực - Vai - Tay sau)', focus: 'Cô lập / Phồng cơ',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Cường độ vừa phải, nghỉ từ 60-90s giữa các set để tối ưu hiệu ứng Pump cơ.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Incline Barbell Press (Đẩy ngực trên)', group: 'Ngực', sets: 4, reps: '8 - 10 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Incline+Barbell+Press' },
+                        { name: 'Dumbbell Shoulder Press (Đẩy vai ngồi)', group: 'Vai', sets: 3, reps: '10 - 12 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Dumbbell+Shoulder+Press' },
+                        { name: 'Chest Dip / Cable Fly (Xà kép / Cáp)', group: 'Ngực', sets: 3, reps: '12 - 15 reps', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Chest+Fly' },
+                        { name: 'Dumbbell Lateral Raise (Banh vai tạ đơn)', group: 'Vai', sets: 4, reps: '12 - 15 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Dumbbell+Lateral+Raise' },
+                        { name: 'Skullcrusher / Overhead Extension', group: 'Tay', sets: 3, reps: '10 - 12 reps', weight: 'EZ-Bar', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Skullcrusher' }
+                    ]
+                },
+                {
+                    id: 'd5', dayName: 'Thứ 6', title: 'Pull B (Lưng - Xô - Tay trước)', focus: 'Độ rộng lưng (Lat Width)',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Hít xà đơn điều khiển chuyển động cẩn thận. Tránh dùng đà quá nhiều.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Pull-up / Chin-up (Hít xà đơn)', group: 'Lưng / Xô', sets: 4, reps: 'Max reps', weight: 'Bodyweight', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Pull+ups' },
+                        { name: 'Seated Cable Row (Kéo xô ngồi)', group: 'Lưng / Xô', sets: 3, reps: '10 - 12 reps', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Seated+Cable+Row' },
+                        { name: 'Single-arm Dumbbell Row', group: 'Lưng / Xô', sets: 3, reps: '10 - 12 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Single+Arm+Dumbbell+Row' },
+                        { name: 'Rear Delt Fly (Banh vai sau)', group: 'Vai', sets: 4, reps: '12 - 15 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Rear+Delt+Fly' },
+                        { name: 'Dumbbell Hammer Curl (Cuốn búa)', group: 'Tay', sets: 3, reps: '10 - 12 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Hammer+Curl' }
+                    ]
+                },
+                {
+                    id: 'd6', dayName: 'Thứ 7', title: 'Legs B (Mông - Đùi sau - Bụng)', focus: 'Thiên về Mông & Đùi Sau',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Hip Thrust gồng chặt mông ở đỉnh 1-2 giây theo hướng dẫn DeltaBolic.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Barbell Hip Thrust (Đẩy mông)', group: 'Đùi / Mông', sets: 4, reps: '8 - 10 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Barbell+Hip+Thrust' },
+                        { name: 'Leg Press (Đẩy chân máy)', group: 'Đùi / Mông', sets: 3, reps: '10 - 12 reps', weight: 'Machine', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Leg+Press' },
+                        { name: 'Romanian Deadlift tạ đơn', group: 'Đùi / Mông', sets: 3, reps: '10 - 12 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Dumbbell+Romanian+Deadlift' },
+                        { name: 'Seated Leg Curl (Móc đùi ngồi)', group: 'Đùi / Mông', sets: 3, reps: '12 - 15 reps', weight: 'Machine', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Seated+Leg+Curl' },
+                        { name: 'Standing Calf Raise', group: 'Đùi / Mông', sets: 4, reps: '15 - 20 reps', weight: 'Machine', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Standing+Calf+Raise' },
+                        { name: 'Cable Crunch / Plank', group: 'Bụng', sets: 3, reps: '60 giây', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Cable+Crunch' }
+                    ]
+                },
+                {
+                    id: 'd7', dayName: 'Chủ Nhật', title: 'Nghỉ Ngơi Hoàn Toàn (Rest Day)', focus: 'Phục hồi hoàn toàn',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Dành ngày này để giãn cơ nhẹ nhàng, ngủ đủ 8 tiếng và bổ sung đủ lượng Protein.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Giãn cơ nhẹ & Đi bộ thư giãn', group: 'Cardio', sets: 1, reps: '20 - 30 phút', weight: 'N/A', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Stretching' }
+                    ]
+                }
+            ]
+        };
+
+        const defaultDataOption2 = {
+            id: 'option2',
+            badge: 'Fat Loss & Endurance',
+            title: 'Phương Án 2: Lịch Tập Kết Hợp (3 Buổi Gym + 3 Buổi Cardio)',
+            desc: 'Mục tiêu đốt cháy mỡ thừa nhanh chóng, cải thiện sức bền tim mạch nhưng vẫn duy trì và săn chắc khối lượng cơ bắp.',
+            days: [
+                {
+                    id: 'd1', dayName: 'Thứ 2', title: 'Gym 1: Upper Body (Thân Trên)', focus: 'Tăng cường sức mạnh toàn thân trên',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Chủ yếu các bài tập đa khớp (Compound) để kích hoạt toàn bộ cơ bắp thân trên.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Dumbbell Bench Press (Đẩy ngực tạ đơn)', group: 'Ngực', sets: 3, reps: '8 - 10 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Dumbbell+Bench+Press' },
+                        { name: 'Lat Pulldown / Pull-up (Kéo xô)', group: 'Lưng / Xô', sets: 3, reps: '8 - 10 reps', weight: 'Machine', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Lat+Pulldown' },
+                        { name: 'Overhead Dumbbell Press (Đẩy vai)', group: 'Vai', sets: 3, reps: '10 - 12 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Dumbbell+Shoulder+Press' },
+                        { name: 'Seated Cable Row (Kéo xô ngồi)', group: 'Lưng / Xô', sets: 3, reps: '10 - 12 reps', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Seated+Cable+Row' },
+                        { name: 'Superset: Bicep Curl + Tricep Pushdown', group: 'Tay', sets: 3, reps: '12 - 15 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Arms' }
+                    ]
+                },
+                {
+                    id: 'd2', dayName: 'Thứ 3', title: 'Cardio 1: Zone 2 Endurance', focus: 'Đốt mỡ hiếu khí & Sức bền',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Chạy bộ nhẹ nhàng hoặc đạp xe. Giữ nhịp tim ở mức 60-70% HRmax.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Chạy bộ / Đạp xe nhịp tim Zone 2', group: 'Cardio', sets: 1, reps: '45 - 60 phút', weight: 'Heart Rate Z2', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Cardio' }
+                    ]
+                },
+                {
+                    id: 'd3', dayName: 'Thứ 4', title: 'Gym 2: Lower Body & Core (Thân Dưới & Bụng)', focus: 'Chân, mông & Siết cơ bụng',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Tập trung tư thế Squat và RDL để giữ cơ đùi và mông săn chắc.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Barbell Squat / Goblet Squat', group: 'Đùi / Mông', sets: 4, reps: '8 - 10 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Goblet+Squat' },
+                        { name: 'Romanian Deadlift (Deadlift đùi sau)', group: 'Đùi / Mông', sets: 3, reps: '10 - 12 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Romanian+Deadlift' },
+                        { name: 'Walking Lunges (Bước gập gối)', group: 'Đùi / Mông', sets: 3, reps: '12 bước/chân', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Walking+Lunges' },
+                        { name: 'Standing Calf Raise', group: 'Đùi / Mông', sets: 3, reps: '15 - 20 reps', weight: 'Machine', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Standing+Calf+Raise' },
+                        { name: 'Plank Combo (Plank chuẩn + Side Plank)', group: 'Bụng', sets: 3, reps: '45 - 60 giây', weight: 'Bodyweight', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Plank' }
+                    ]
+                },
+                {
+                    id: 'd4', dayName: 'Thứ 5', title: 'Cardio 2: HIIT (Tập Ngắt Quãng Cường Độ Cao)', focus: 'Đốt calo cực đại & Tăng EPOC',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Sprint 30 giây hết sức -> Đi bộ hồi phục 60 giây. Lặp lại 10-12 chu kỳ.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Khởi động đi bộ nhanh', group: 'Cardio', sets: 1, reps: '5 phút', weight: 'N/A', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Warmup' },
+                        { name: 'HIIT Treadmill Sprint (30s Sprint / 60s Walk)', group: 'Cardio', sets: 10, reps: '12 chu kỳ', weight: 'High Speed', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+HIIT' },
+                        { name: 'Cool down đi bộ thả lỏng', group: 'Cardio', sets: 1, reps: '5 phút', weight: 'N/A', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Cooldown' }
+                    ]
+                },
+                {
+                    id: 'd5', dayName: 'Thứ 6', title: 'Gym 3: Full Body (Toàn Thân)', focus: 'Kích hoạt lại toàn bộ cơ bắp',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Toàn thân tổng hợp giúp duy trì khối lượng cơ bắp trong quá trình thâm hụt calo.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Barbell Deadlift (Cơ bản)', group: 'Lưng / Xô', sets: 3, reps: '6 - 8 reps', weight: 'Barbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Barbell+Deadlift' },
+                        { name: 'Incline Dumbbell Press (Ngực trên)', group: 'Ngực', sets: 3, reps: '10 - 12 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Incline+Dumbbell+Press' },
+                        { name: 'Dumbbell Bulgarian Split Squat', group: 'Đùi / Mông', sets: 3, reps: '10 reps/chân', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Bulgarian+Split+Squat' },
+                        { name: 'Lat Pulldown / Cable Row', group: 'Lưng / Xô', sets: 3, reps: '10 - 12 reps', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Lat+Pulldown' },
+                        { name: 'Dumbbell Lateral Raise (Vai)', group: 'Vai', sets: 3, reps: '15 reps', weight: 'Dumbbell', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Dumbbell+Lateral+Raise' }
+                    ]
+                },
+                {
+                    id: 'd6', dayName: 'Thứ 7', title: 'Cardio 3: LISS / Active Recovery', focus: 'Phục hồi chủ động & Đốt calo nhẹ',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Đi bộ dốc (Incline 8-12, tốc độ 4.5 - 5.5 km/h) hoặc bơi lội nhẹ nhàng.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Incline Treadmill Walk (Đi bộ dốc) / Bơi lội', group: 'Cardio', sets: 1, reps: '45 phút', weight: 'Incline 8-12', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Incline+Walk' }
+                    ]
+                },
+                {
+                    id: 'd7', dayName: 'Chủ Nhật', title: 'Nghỉ Ngơi Hoàn Toàn (Rest Day)', focus: 'Thả lỏng toàn bộ cơ thể',
+                    notes: 'Coach Phan Văn Nhựt lưu ý: Nghỉ ngơi hoàn toàn để cơ bắp nạp lại glycogen.',
+                    memo: '',
+                    exercises: [
+                        { name: 'Nghỉ ngơi / Stretch nhẹ nhàng', group: 'Cardio', sets: 1, reps: '15 phút', weight: 'N/A', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Stretching' }
+                    ]
+                }
+            ]
+        };
+
+        // App State Variables
+        let currentOptionKey = 'option1';
+        let currentDayIndex = 0;
+        let activeData = null;
+        let myChart = null;
+        let weightChart = null;
+        let pendingConfirmCallback = null;
+        let appData = null;
+
+        // ===== Persistent Storage & Multi-Student Management =====
+        const STORAGE_KEY = 'coachPVN_gymApp_data_v1';
+
+        // Tinh chỉnh lịch tập theo giới tính: Nữ -> tăng Mông & Lưng/Xô, giảm Ngực/Vai, thêm bài bổ trợ
+        function genderAdjustedProgram(base, gender) {
+            const data = JSON.parse(JSON.stringify(base));
+            if (gender !== 'female') return data;
+
+            data.badge = data.badge + ' · Nữ: Tăng Mông & Lưng Xô';
+            data.desc = data.desc + ' Đã tinh chỉnh: tăng khối lượng nhóm Mông và Lưng/Xô, giảm bớt Ngực/Vai để phù hợp mục tiêu vóc dáng nữ.';
+
+            data.days.forEach(day => {
+                day.exercises.forEach(ex => {
+                    const sets = parseInt(ex.sets) || 3;
+                    if (ex.group === 'Đùi / Mông' || ex.group === 'Lưng / Xô') {
+                        ex.sets = sets + 1;
+                    } else if (ex.group === 'Ngực' || ex.group === 'Vai') {
+                        ex.sets = Math.max(2, sets - 1);
+                    }
+                });
+
+                const hasLegs = day.exercises.some(e => e.group === 'Đùi / Mông');
+                const hasBack = day.exercises.some(e => e.group === 'Lưng / Xô');
+
+                if (hasLegs && !day.exercises.some(e => e.name.includes('Kickback'))) {
+                    day.exercises.push({ name: 'Cable Glute Kickback (Đá mông cáp)', group: 'Đùi / Mông', sets: 3, reps: '15 reps/chân', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Cable+Glute+Kickback' });
+                }
+                if (hasBack && !day.exercises.some(e => e.name.includes('Straight-Arm') || e.name.includes('Pullover'))) {
+                    day.exercises.push({ name: 'Straight-Arm Pulldown (Kéo xô tay thẳng)', group: 'Lưng / Xô', sets: 3, reps: '12 - 15 reps', weight: 'Cable', youtube: 'https://www.youtube.com/results?search_query=DeltaBolic+Straight+Arm+Pulldown' });
+                }
+            });
+
+            return data;
+        }
+
+        function applyGenderFocus() {
+            const s = getCurrentStudent();
+            const gender = document.getElementById('student-gender').value;
+            const msg = gender === 'female'
+                ? 'Thao tác sẽ áp dụng lại CẢ 2 phương án lịch tập: tăng khối lượng nhóm Mông & Lưng/Xô, giảm bớt Ngực/Vai, và thêm bài tập bổ trợ phù hợp cho nữ. Mọi chỉnh sửa thủ công trước đó trên cả 2 phương án sẽ bị ghi đè. Tiếp tục?'
+                : 'Thao tác sẽ áp dụng lại CẢ 2 phương án lịch tập theo cấu trúc mặc định tiêu chuẩn (không tinh chỉnh Mông/Lưng riêng). Mọi chỉnh sửa thủ công trước đó sẽ bị ghi đè. Tiếp tục?';
+
+            showConfirmModal('Áp Dụng Tinh Chỉnh Theo Giới Tính', msg, () => {
+                s.gender = gender;
+                s.programs.option1 = genderAdjustedProgram(defaultDataOption1, gender);
+                s.programs.option2 = genderAdjustedProgram(defaultDataOption2, gender);
+                activeData = s.programs[currentOptionKey];
+                currentDayIndex = 0;
+                renderOptionDetails();
+                saveAppData();
+                showToast(gender === 'female' ? '🎯 Đã tinh chỉnh lịch tập tập trung Mông & Lưng Xô!' : '🔄 Đã áp dụng lịch tập mặc định tiêu chuẩn!');
+            });
+        }
+
+        function makeNewStudent(name, gender) {
+            gender = gender === 'female' ? 'female' : 'male';
+            return {
+                id: 'stu_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                name: name || 'Học Viên Mới',
+                gender: gender,
+                goal: 'gain',
+                weight: 68,
+                startDate: 'Tuần 01 - Tháng 09/2026',
+                note: 'Mở link YouTube đính kèm từng bài để xem clip mô phỏng form chuẩn từ Andrew Kwong (DeltaBolic) trước khi tập!',
+                currentOption: 'option1',
+                programs: {
+                    option1: genderAdjustedProgram(defaultDataOption1, gender),
+                    option2: genderAdjustedProgram(defaultDataOption2, gender)
+                },
+                weeklyLogs: [],
+                completions: {},
+                liftLogs: [],
+                measurements: [],
+                height: null,
+                age: null,
+                meal: { activity: 'moderate', mealsPerDay: 4 }
+            };
+        }
+
+        function loadAppData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.students && Object.keys(parsed.students).length > 0) {
+                        Object.values(parsed.students).forEach(normalizeStudent);
+                        return parsed;
+                    }
+                }
+            } catch (e) { console.warn('Không đọc được dữ liệu đã lưu:', e); }
+            const s = makeNewStudent('Nguyễn Văn A');
+            return { currentStudentId: s.id, students: { [s.id]: s } };
+        }
+
+        function saveAppData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            } catch (e) { console.warn('Không lưu được dữ liệu vào trình duyệt:', e); }
+        }
+
+        function getCurrentStudent() {
+            return appData.students[appData.currentStudentId];
+        }
+
+        function normalizeStudent(st) {
+            st.gender = st.gender === 'female' ? 'female' : 'male';
+            st.goal = st.goal || 'gain';
+            st.weight = parseFloat(st.weight) || 68;
+            st.currentOption = st.currentOption === 'option2' ? 'option2' : 'option1';
+            st.programs = st.programs || {};
+            if (!st.programs.option1) st.programs.option1 = genderAdjustedProgram(defaultDataOption1, st.gender);
+            if (!st.programs.option2) st.programs.option2 = genderAdjustedProgram(defaultDataOption2, st.gender);
+            st.weeklyLogs = Array.isArray(st.weeklyLogs) ? st.weeklyLogs : [];
+            renumberWeeklyLogs(st);
+            st.completions = st.completions || {};
+            st.meal = st.meal || { activity: 'moderate', mealsPerDay: 4 };
+            st.height = parseFloat(st.height) || null;
+            st.age = parseFloat(st.age) || null;
+            st.liftLogs = Array.isArray(st.liftLogs) ? st.liftLogs : [];
+            st.measurements = Array.isArray(st.measurements) ? st.measurements : [];
+            return st;
+        }
+
+        function exportBackup() {
+            const stamp = todayKey();
+            const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sao-luu-app-gym-' + stamp + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast('⬇️ Đã tải file sao lưu ' + Object.keys(appData.students).length + ' học viên!');
+        }
+
+        function importBackup(event) {
+            const file = event.target.files && event.target.files[0];
+            event.target.value = '';
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                let parsed;
+                try {
+                    parsed = JSON.parse(reader.result);
+                } catch (e) {
+                    showToast('⚠️ File không hợp lệ, không đọc được dữ liệu!');
+                    return;
+                }
+                const ids = parsed && parsed.students ? Object.keys(parsed.students) : [];
+                if (ids.length === 0) {
+                    showToast('⚠️ File không chứa dữ liệu học viên!');
+                    return;
+                }
+                showConfirmModal(
+                    'Khôi Phục Từ File Sao Lưu',
+                    'File chứa ' + ids.length + ' học viên. Thao tác sẽ THAY THẾ toàn bộ dữ liệu hiện tại trên trình duyệt này. Nên bấm "Sao lưu" trước nếu cần giữ dữ liệu hiện có. Tiếp tục?',
+                    () => {
+                        ids.forEach(id => normalizeStudent(parsed.students[id]));
+                        appData = { currentStudentId: parsed.students[parsed.currentStudentId] ? parsed.currentStudentId : ids[0], students: parsed.students };
+                        saveAppData();
+                        renderStudentSelector();
+                        loadStudentIntoUI();
+                        showToast('⬆️ Đã khôi phục ' + ids.length + ' học viên từ file sao lưu!');
+                    }
+                );
+            };
+            reader.onerror = () => showToast('⚠️ Không đọc được file!');
+            reader.readAsText(file);
+        }
+
+        function renderStudentSelector() {
+            const sel = document.getElementById('student-selector');
+            if (!sel) return;
+            sel.innerHTML = '';
+            Object.values(appData.students).forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.innerText = s.name;
+                if (s.id === appData.currentStudentId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function switchStudent(id) {
+            if (!appData.students[id]) return;
+            appData.currentStudentId = id;
+            saveAppData();
+            loadStudentIntoUI();
+            showToast('👤 Đã chuyển sang học viên: ' + getCurrentStudent().name);
+        }
+
+        function createNewStudentPrompt() {
+            const name = prompt('Nhập tên học viên mới:');
+            if (!name || !name.trim()) return;
+            const genderInput = (prompt('Giới tính học viên? Gõ "nam" hoặc "nu":', 'nam') || 'nam').trim().toLowerCase();
+            const gender = (genderInput.startsWith('nu') || genderInput.includes('nữ') || genderInput.includes('female')) ? 'female' : 'male';
+            const s = makeNewStudent(name.trim(), gender);
+            appData.students[s.id] = s;
+            appData.currentStudentId = s.id;
+            saveAppData();
+            renderStudentSelector();
+            loadStudentIntoUI();
+            showToast('✅ Đã tạo hồ sơ học viên: ' + s.name + (gender === 'female' ? ' (đã tinh chỉnh Mông & Lưng Xô)' : ''));
+        }
+
+        function deleteCurrentStudentConfirm() {
+            const ids = Object.keys(appData.students);
+            if (ids.length <= 1) {
+                showToast('⚠️ Cần giữ lại ít nhất 1 học viên trong hệ thống!');
+                return;
+            }
+            const s = getCurrentStudent();
+            showConfirmModal(
+                'Xóa Học Viên',
+                `Xóa toàn bộ hồ sơ, lịch tập và tiến độ của "${s.name}"? Hành động này không thể hoàn tác.`,
+                () => {
+                    delete appData.students[s.id];
+                    appData.currentStudentId = Object.keys(appData.students)[0];
+                    saveAppData();
+                    renderStudentSelector();
+                    loadStudentIntoUI();
+                    showToast('🗑️ Đã xóa hồ sơ học viên!');
+                }
+            );
+        }
+
+        function syncProfileFromUI() {
+            const s = getCurrentStudent();
+            if (!s) return;
+            s.name = document.getElementById('student-name').value.trim() || 'Học Viên';
+            s.gender = document.getElementById('student-gender').value;
+            s.goal = document.getElementById('student-goal').value;
+            s.weight = parseFloat(document.getElementById('student-weight').value) || s.weight;
+            s.startDate = document.getElementById('student-start-date').value.trim();
+            s.note = document.getElementById('coach-special-note').value.trim();
+            s.height = parseFloat(document.getElementById('student-height').value) || null;
+            s.age = parseFloat(document.getElementById('student-age').value) || null;
+            saveAppData();
+            renderStudentSelector();
+        }
+
+        function loadStudentIntoUI() {
+            const s = getCurrentStudent();
+            if (!s) return;
+
+            document.getElementById('student-name').value = s.name;
+            document.getElementById('student-gender').value = s.gender || 'male';
+            document.getElementById('student-goal').value = s.goal;
+            document.getElementById('student-weight').value = s.weight;
+            document.getElementById('student-height').value = s.height || '';
+            document.getElementById('student-age').value = s.age || '';
+            document.getElementById('student-start-date').value = s.startDate;
+            document.getElementById('coach-special-note').value = s.note;
+            document.getElementById('meal-activity').value = s.meal.activity;
+            document.getElementById('meal-count').value = s.meal.mealsPerDay;
+
+            currentOptionKey = s.currentOption || 'option1';
+            currentDayIndex = 0;
+            if (!s.programs[currentOptionKey]) {
+                s.programs[currentOptionKey] = JSON.parse(JSON.stringify(currentOptionKey === 'option1' ? defaultDataOption1 : defaultDataOption2));
+            }
+            activeData = s.programs[currentOptionKey];
+
+            const btn1 = document.getElementById('btn-option1');
+            const btn2 = document.getElementById('btn-option2');
+            if (currentOptionKey === 'option1') {
+                btn1.className = "px-3.5 py-2 text-xs font-bold rounded-lg transition-all shadow-sm bg-emerald-500 text-slate-950";
+                btn2.className = "px-3.5 py-2 text-xs font-bold rounded-lg transition-all text-slate-300 hover:text-white";
+            } else {
+                btn2.className = "px-3.5 py-2 text-xs font-bold rounded-lg transition-all shadow-sm bg-indigo-500 text-white";
+                btn1.className = "px-3.5 py-2 text-xs font-bold rounded-lg transition-all text-slate-300 hover:text-white";
+            }
+
+            updateStudentHeader();
+            renderOptionDetails();
+            calculateNutrition();
+            renderWeeklyLog();
+            updateWeightChart();
+            refreshLiftNames();
+            renderLifts();
+            renderMeasurements();
+        }
+
+        // ===== Weekly Progress Tracking =====
+        function initWeightChart() {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            weightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Cân nặng (kg)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', yAxisID: 'y', tension: 0.3 },
+                        { label: 'Tổng tạ 3 bài chính (kg)', data: [], borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', yAxisID: 'y1', tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { position: 'left', title: { display: true, text: 'Cân nặng (kg)' } },
+                        y1: { position: 'right', title: { display: true, text: 'Tổng tạ (kg)' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+        }
+
+        function updateWeightChart() {
+            const s = getCurrentStudent();
+            if (!weightChart || !s) return;
+            const logs = s.weeklyLogs;
+            weightChart.data.labels = logs.map(l => 'Tuần ' + l.week);
+            weightChart.data.datasets[0].data = logs.map(l => l.weight);
+            weightChart.data.datasets[1].data = logs.map(l => l.compound);
+            weightChart.update();
+        }
+
+        function saveWeeklyLog() {
+            const s = getCurrentStudent();
+            const weight = parseFloat(document.getElementById('log-weight').value);
+            const compound = parseFloat(document.getElementById('log-compound').value) || null;
+            const note = document.getElementById('log-note').value.trim();
+            if (!weight) { showToast('⚠️ Vui lòng nhập cân nặng tuần này!'); return; }
+
+            const weekNum = s.weeklyLogs.length + 1;
+            s.weeklyLogs.push({ id: Date.now(), week: weekNum, date: new Date().toLocaleDateString('vi-VN'), weight, compound, note });
+            s.weight = weight;
+
+            document.getElementById('student-weight').value = weight;
+            document.getElementById('log-weight').value = '';
+            document.getElementById('log-compound').value = '';
+            document.getElementById('log-note').value = '';
+
+            saveAppData();
+            renderWeeklyLog();
+            updateWeightChart();
+            calculateNutrition();
+            showToast('✅ Đã lưu số đo Tuần ' + weekNum + '!');
+        }
+
+        function renumberWeeklyLogs(student) {
+            student.weeklyLogs.forEach((l, i) => { l.week = i + 1; });
+        }
+
+        function deleteWeeklyLog(id) {
+            const s = getCurrentStudent();
+            s.weeklyLogs = s.weeklyLogs.filter(l => l.id !== id);
+            renumberWeeklyLogs(s);
+            saveAppData();
+            renderWeeklyLog();
+            updateWeightChart();
+        }
+
+        function renderWeeklyLog() {
+            const s = getCurrentStudent();
+            const box = document.getElementById('weekly-log-list');
+            if (!s || !box) return;
+            if (s.weeklyLogs.length === 0) {
+                box.innerHTML = '<div class="p-3 text-center text-slate-400">Chưa có số đo nào được ghi lại.</div>';
+                return;
+            }
+            box.innerHTML = s.weeklyLogs.slice().reverse().map(l => `
+                <div class="flex items-center justify-between p-2.5">
+                    <div>
+                        <span class="font-bold text-slate-700">Tuần ${l.week}</span> — ${esc(l.date)}
+                        <div class="text-slate-500">${l.weight}kg${l.compound ? ' · Tổng tạ: ' + l.compound + 'kg' : ''}${l.note ? ' · ' + esc(l.note) : ''}</div>
+                    </div>
+                    <button onclick="deleteWeeklyLog(${l.id})" class="text-rose-500 hover:text-rose-700 px-2">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // ===== Workout Completion History =====
+        function todayKey() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        function completionKey() {
+            return currentOptionKey + '-' + activeData.days[currentDayIndex].id;
+        }
+
+        function toggleTodayCompletion() {
+            const s = getCurrentStudent();
+            const key = completionKey();
+            const today = todayKey();
+            if (!s.completions[key]) s.completions[key] = [];
+            const idx = s.completions[key].indexOf(today);
+            if (idx >= 0) {
+                s.completions[key].splice(idx, 1);
+                showToast('Đã bỏ đánh dấu hoàn thành hôm nay.');
+            } else {
+                s.completions[key].push(today);
+                showToast('✅ Đã đánh dấu hoàn thành buổi tập hôm nay!');
+            }
+            saveAppData();
+            renderCompletionStatus();
+        }
+
+        function renderCompletionStatus() {
+            const s = getCurrentStudent();
+            const icon = document.getElementById('complete-today-icon');
+            const countEl = document.getElementById('day-complete-count');
+            if (!s || !icon || !activeData) return;
+            const key = completionKey();
+            const list = s.completions[key] || [];
+            const done = list.includes(todayKey());
+            icon.innerText = done ? '✅' : '⬜';
+            countEl.innerText = 'Đã hoàn thành ' + list.length + ' lần buổi này' + (list.length ? ' · Gần nhất: ' + list.slice(-3).reverse().join(', ') : '');
+            renderAdherence();
+        }
+
+        // ===== Helpers ngày & chuỗi =====
+        function fmtISO(dt) {
+            return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+        }
+        function fmtDate(iso) {
+            if (!iso) return '';
+            const [y, m, d] = iso.split('-');
+            return d + '/' + m + '/' + y;
+        }
+        function fmtShort(iso) {
+            const [y, m, d] = iso.split('-');
+            return d + '/' + m + '/' + y.slice(2);
+        }
+        function esc(str) {
+            return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        function setDefaultDates() {
+            ['lift-date', 'ms-date', 'adh-date'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.value) el.value = todayKey();
+            });
+        }
+
+        // ===== Mức tạ từng bài =====
+        let liftChart = null;
+
+        function initLiftChart() {
+            const ctx = document.getElementById('liftChart').getContext('2d');
+            liftChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Mức tạ (kg)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', tension: 0.3, fill: true }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'kg' } } } }
+            });
+        }
+
+        function refreshLiftNames() {
+            const s = getCurrentStudent();
+            const dl = document.getElementById('lift-names');
+            if (!s || !dl) return;
+            const names = new Set();
+            Object.values(s.programs).forEach(p => p.days.forEach(d => d.exercises.forEach(e => names.add(e.name))));
+            Object.values(EXERCISE_LIBRARY).forEach(list => list.forEach(([n]) => names.add(n)));
+            s.liftLogs.forEach(l => names.add(l.exercise));
+            dl.innerHTML = [...names].map(n => `<option value="${esc(n)}"></option>`).join('');
+        }
+
+        function liftSummary(s) {
+            const groups = {};
+            s.liftLogs.forEach(l => { (groups[l.exercise] = groups[l.exercise] || []).push(l); });
+            return Object.entries(groups).map(([name, arr]) => {
+                arr.sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+                const dayBest = {};
+                arr.forEach(l => { dayBest[l.date] = Math.max(dayBest[l.date] || 0, l.weight); });
+                const days = Object.keys(dayBest).sort();
+                const first = dayBest[days[0]];
+                const last = dayBest[days[days.length - 1]];
+                return { name, first, last, best: Math.max(...arr.map(l => l.weight)), sessions: days.length, diff: last - first };
+            }).sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        function saveLiftLog() {
+            const s = getCurrentStudent();
+            const exercise = document.getElementById('lift-exercise').value.trim();
+            const weight = parseFloat(document.getElementById('lift-weight').value);
+            const reps = parseInt(document.getElementById('lift-reps').value) || null;
+            const date = document.getElementById('lift-date').value || todayKey();
+            if (!exercise) { showToast('⚠️ Vui lòng nhập tên bài tập!'); return; }
+            if (isNaN(weight) || weight < 0) { showToast('⚠️ Vui lòng nhập mức tạ (kg)!'); return; }
+            s.liftLogs.push({ id: Date.now(), date, exercise, weight, reps });
+            document.getElementById('lift-exercise').value = '';
+            document.getElementById('lift-weight').value = '';
+            document.getElementById('lift-reps').value = '';
+            saveAppData();
+            renderLifts(exercise);
+            showToast('✅ Đã ghi ' + exercise + ': ' + weight + 'kg');
+        }
+
+        function deleteLiftLog(id) {
+            const s = getCurrentStudent();
+            s.liftLogs = s.liftLogs.filter(l => l.id !== id);
+            saveAppData();
+            renderLifts();
+        }
+
+        function renderLifts(selectName) {
+            const s = getCurrentStudent();
+            const sel = document.getElementById('lift-chart-select');
+            if (!s || !sel) return;
+            const names = [...new Set(s.liftLogs.map(l => l.exercise))].sort();
+            const prev = selectName || sel.value;
+            sel.innerHTML = names.length
+                ? names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('')
+                : '<option value="">Chưa có dữ liệu mức tạ</option>';
+            if (names.includes(prev)) sel.value = prev;
+            updateLiftChart();
+
+            const summary = liftSummary(s);
+            document.getElementById('lift-summary').innerHTML = summary.length === 0
+                ? '<div class="text-slate-400">Ghi mức tạ đầu tiên để bắt đầu theo dõi.</div>'
+                : summary.map(x => {
+                    const change = x.sessions > 1
+                        ? `<span class="font-bold ${x.diff > 0 ? 'text-emerald-600' : x.diff < 0 ? 'text-rose-600' : 'text-slate-500'}">${x.diff > 0 ? '+' : ''}${x.diff}kg</span>`
+                        : '<span class="text-slate-400">mới 1 lần ghi</span>';
+                    return `<div class="flex justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5"><span class="font-semibold text-slate-700">${esc(x.name)}</span><span class="text-slate-500">${x.first}kg → ${x.last}kg · cao nhất ${x.best}kg · ${change}</span></div>`;
+                }).join('');
+
+            const recent = s.liftLogs.slice().sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id).slice(0, 10);
+            document.getElementById('lift-log-list').innerHTML = recent.length === 0
+                ? '<div class="p-3 text-center text-slate-400">Chưa có bản ghi nào.</div>'
+                : recent.map(l => `<div class="flex items-center justify-between p-2.5"><div><span class="font-bold text-slate-700">${esc(l.exercise)}</span> — ${fmtDate(l.date)}<div class="text-slate-500">${l.weight}kg${l.reps ? ' x ' + l.reps + ' reps' : ''}</div></div><button onclick="deleteLiftLog(${l.id})" class="text-rose-500 hover:text-rose-700 px-2">🗑️</button></div>`).join('');
+        }
+
+        function updateLiftChart() {
+            const s = getCurrentStudent();
+            const sel = document.getElementById('lift-chart-select');
+            if (!liftChart || !s || !sel) return;
+            const name = sel.value;
+            const byDate = {};
+            s.liftLogs.filter(l => l.exercise === name).forEach(l => { byDate[l.date] = Math.max(byDate[l.date] || 0, l.weight); });
+            const dates = Object.keys(byDate).sort();
+            liftChart.data.labels = dates.map(fmtShort);
+            liftChart.data.datasets[0].data = dates.map(d => byDate[d]);
+            liftChart.data.datasets[0].label = name ? name + ' (kg)' : 'Mức tạ (kg)';
+            liftChart.update();
+        }
+
+        // ===== Số đo vòng cơ thể =====
+        let measureChart = null;
+        const MEASURE_FIELDS = [
+            ['hip', 'Mông/Hông', '#ec4899'],
+            ['waist', 'Eo', '#f59e0b'],
+            ['thigh', 'Đùi', '#6366f1'],
+            ['chest', 'Ngực', '#10b981'],
+            ['arm', 'Tay', '#0ea5e9']
+        ];
+
+        function initMeasureChart() {
+            const ctx = document.getElementById('measureChart').getContext('2d');
+            measureChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'cm' } } } }
+            });
+        }
+
+        function measureSummary(s) {
+            const sorted = s.measurements.slice().sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+            return MEASURE_FIELDS.map(([key, label]) => {
+                const vals = sorted.filter(m => m[key] != null).map(m => m[key]);
+                if (vals.length === 0) return null;
+                const first = vals[0], last = vals[vals.length - 1];
+                return { label, first, last, n: vals.length, diff: Math.round((last - first) * 10) / 10 };
+            }).filter(Boolean);
+        }
+
+        function saveMeasurement() {
+            const s = getCurrentStudent();
+            const entry = { id: Date.now(), date: document.getElementById('ms-date').value || todayKey() };
+            let any = false;
+            MEASURE_FIELDS.forEach(([key]) => {
+                const v = parseFloat(document.getElementById('ms-' + key).value);
+                entry[key] = isNaN(v) || v <= 0 ? null : v;
+                if (entry[key] != null) any = true;
+            });
+            if (!any) { showToast('⚠️ Nhập ít nhất một số đo!'); return; }
+            s.measurements.push(entry);
+            MEASURE_FIELDS.forEach(([key]) => { document.getElementById('ms-' + key).value = ''; });
+            saveAppData();
+            renderMeasurements();
+            showToast('✅ Đã lưu số đo ngày ' + fmtDate(entry.date));
+        }
+
+        function deleteMeasurement(id) {
+            const s = getCurrentStudent();
+            s.measurements = s.measurements.filter(m => m.id !== id);
+            saveAppData();
+            renderMeasurements();
+        }
+
+        function renderMeasurements() {
+            const s = getCurrentStudent();
+            if (!s || !measureChart) return;
+            const sorted = s.measurements.slice().sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+            measureChart.data.labels = sorted.map(m => fmtShort(m.date));
+            measureChart.data.datasets = MEASURE_FIELDS.map(([key, label, color]) => ({
+                label: label + ' (cm)',
+                data: sorted.map(m => m[key]),
+                borderColor: color,
+                backgroundColor: color,
+                tension: 0.3,
+                spanGaps: true,
+                hidden: !sorted.some(m => m[key] != null)
+            }));
+            measureChart.update();
+
+            const sum = measureSummary(s);
+            document.getElementById('ms-summary').innerHTML = sum.length === 0
+                ? '<span class="text-slate-400">Chưa có số đo nào.</span>'
+                : sum.map(x => `<span class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5"><b class="text-slate-700">${x.label}:</b> ${x.n > 1 ? x.first + ' → ' + x.last + ' cm (' + (x.diff > 0 ? '+' : '') + x.diff + ')' : x.last + ' cm'}</span>`).join('');
+
+            const recent = sorted.slice().reverse().slice(0, 10);
+            document.getElementById('ms-log-list').innerHTML = recent.length === 0
+                ? '<div class="p-3 text-center text-slate-400">Chưa có bản ghi nào.</div>'
+                : recent.map(m => {
+                    const parts = MEASURE_FIELDS.filter(([k]) => m[k] != null).map(([k, label]) => label + ' ' + m[k]);
+                    return `<div class="flex items-center justify-between p-2.5"><div><span class="font-bold text-slate-700">${fmtDate(m.date)}</span><div class="text-slate-500">${parts.join(' · ')} (cm)</div></div><button onclick="deleteMeasurement(${m.id})" class="text-rose-500 hover:text-rose-700 px-2">🗑️</button></div>`;
+                }).join('');
+        }
+
+        // ===== Chuyên cần =====
+        const WEEKLY_TARGET = 6;
+        const WEEK_OK = 5;
+
+        function mondayKey(iso) {
+            const [y, m, d] = iso.split('-').map(Number);
+            const dt = new Date(y, m - 1, d);
+            dt.setDate(dt.getDate() - ((dt.getDay() + 6) % 7));
+            return fmtISO(dt);
+        }
+
+        function computeAdherence(s) {
+            const dates = new Set();
+            Object.values(s.completions).forEach(arr => arr.forEach(d => dates.add(d)));
+            const counts = {};
+            dates.forEach(d => { const k = mondayKey(d); counts[k] = (counts[k] || 0) + 1; });
+            const thisMon = mondayKey(todayKey());
+            const weekKey = off => {
+                const [y, m, d] = thisMon.split('-').map(Number);
+                return fmtISO(new Date(y, m - 1, d - 7 * off));
+            };
+            const thisCount = counts[thisMon] || 0;
+            let streak = 0;
+            for (let off = thisCount >= WEEK_OK ? 0 : 1; off < 400; off++) {
+                if ((counts[weekKey(off)] || 0) >= WEEK_OK) streak++; else break;
+            }
+            return { counts, weekKey, thisCount, streak, total: dates.size };
+        }
+
+        function renderAdherence() {
+            const s = getCurrentStudent();
+            const box = document.getElementById('adh-summary');
+            const sel = document.getElementById('adh-day');
+            if (!s || !box || !sel || !activeData) return;
+
+            const prev = sel.value;
+            sel.innerHTML = activeData.days.map(d => `<option value="${esc(d.id)}">${esc(d.dayName)} — ${esc(d.title)}</option>`).join('');
+            if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+
+            const ad = computeAdherence(s);
+            const pct = Math.min(100, Math.round(ad.thisCount / WEEKLY_TARGET * 100));
+            const weeks = [3, 2, 1, 0].map(off => {
+                const k = ad.weekKey(off);
+                const c = ad.counts[k] || 0;
+                const h = Math.min(100, Math.round(c / WEEKLY_TARGET * 100));
+                return `<div class="flex-1 text-center"><div class="h-16 flex items-end justify-center"><div class="w-8 rounded-t ${c >= WEEK_OK ? 'bg-emerald-500' : 'bg-amber-400'}" style="height:${Math.max(h, c ? 8 : 2)}%"></div></div><div class="font-bold text-slate-700 mt-1">${c}/${WEEKLY_TARGET}</div><div class="text-[10px] text-slate-400">Tuần ${fmtShort(k).slice(0, 5)}</div></div>`;
+            }).join('');
+
+            box.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl"><span class="block text-emerald-700 font-medium">Tuần này</span><span class="text-xl font-extrabold text-emerald-700">${ad.thisCount}/${WEEKLY_TARGET} buổi</span><div class="h-2 bg-emerald-100 rounded mt-2"><div class="h-2 bg-emerald-500 rounded" style="width:${pct}%"></div></div></div>
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl"><span class="block text-amber-700 font-medium">Chuỗi tuần đạt ≥${WEEK_OK}/${WEEKLY_TARGET} buổi</span><span class="text-xl font-extrabold text-amber-700">${ad.streak} tuần</span></div>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl"><span class="block text-slate-500 font-medium">Tổng số ngày đã tập</span><span class="text-xl font-extrabold text-slate-800">${ad.total} ngày</span></div>
+                <div class="p-3 bg-white border border-slate-200 rounded-xl"><div class="flex gap-1">${weeks}</div></div>
+            </div>`;
+        }
+
+        function toggleCompletionOnDate() {
+            const s = getCurrentStudent();
+            const dayId = document.getElementById('adh-day').value;
+            const date = document.getElementById('adh-date').value || todayKey();
+            if (date > todayKey()) { showToast('⚠️ Không thể đánh dấu ngày trong tương lai!'); return; }
+            const key = currentOptionKey + '-' + dayId;
+            const list = s.completions[key] || (s.completions[key] = []);
+            const idx = list.indexOf(date);
+            if (idx >= 0) { list.splice(idx, 1); showToast('Đã bỏ đánh dấu ngày ' + fmtDate(date)); }
+            else { list.push(date); list.sort(); showToast('✅ Đã đánh dấu đã tập ngày ' + fmtDate(date)); }
+            saveAppData();
+            renderCompletionStatus();
+        }
+
+        // ===== Auto Meal Plan by Calories =====
+        const ACTIVITY_FACTOR = { light: 28, moderate: 31, high: 34 };
+        const MEAL_TEMPLATES = {
+            3: [{ name: 'Bữa Sáng', ratio: 0.3 }, { name: 'Bữa Trưa', ratio: 0.4 }, { name: 'Bữa Tối', ratio: 0.3 }],
+            4: [{ name: 'Bữa Sáng', ratio: 0.25 }, { name: 'Bữa Trưa', ratio: 0.35 }, { name: 'Bữa Xế', ratio: 0.1 }, { name: 'Bữa Tối', ratio: 0.3 }],
+            5: [{ name: 'Bữa Sáng', ratio: 0.2 }, { name: 'Bữa Phụ Sáng', ratio: 0.1 }, { name: 'Bữa Trưa', ratio: 0.3 }, { name: 'Bữa Xế', ratio: 0.1 }, { name: 'Bữa Tối', ratio: 0.3 }]
+        };
+        // Mỗi món: kcal100 = năng lượng/100g (hoặc 100ml với sữa), ratio = tỷ lệ calo bữa ăn dành cho món đó
+        const MEAL_RECIPES = {
+            'Bữa Sáng': [
+                { food: 'Yến mạch khô', kcal100: 389, ratio: 0.40, unit: 'g' },
+                { food: 'Trứng gà luộc', kcal100: 155, ratio: 0.25, unit: 'g' },
+                { food: 'Sữa tươi không đường', kcal100: 42, ratio: 0.35, unit: 'ml' }
+            ],
+            'Bữa Phụ Sáng': [
+                { food: 'Sữa chua không đường', kcal100: 61, ratio: 0.5, unit: 'g' },
+                { food: 'Chuối', kcal100: 89, ratio: 0.3, unit: 'g' },
+                { food: 'Hạnh nhân/óc chó', kcal100: 580, ratio: 0.2, unit: 'g' }
+            ],
+            'Bữa Trưa': [
+                { food: 'Cơm trắng/gạo lứt', kcal100: 130, ratio: 0.45, unit: 'g' },
+                { food: 'Ức gà/thịt bò/cá nạc', kcal100: 165, ratio: 0.40, unit: 'g' },
+                { food: 'Rau xanh luộc/xào', kcal100: 25, ratio: 0.15, unit: 'g' }
+            ],
+            'Bữa Xế': [
+                { food: 'Whey protein', kcal100: 400, ratio: 0.6, unit: 'g' },
+                { food: 'Chuối/trái cây', kcal100: 89, ratio: 0.4, unit: 'g' }
+            ],
+            'Bữa Tối': [
+                { food: 'Khoai lang/cơm', kcal100: 100, ratio: 0.35, unit: 'g' },
+                { food: 'Cá/ức gà/thịt nạc', kcal100: 165, ratio: 0.45, unit: 'g' },
+                { food: 'Rau củ luộc/hấp', kcal100: 25, ratio: 0.20, unit: 'g' }
+            ]
+        };
+
+        // Hệ số vận động khi đã có chiều cao & tuổi (công thức Mifflin-St Jeor)
+        const ACTIVITY_MULT = { light: 1.4, moderate: 1.55, high: 1.725 };
+
+        // Tính giáo án bữa ăn (dùng chung cho hiển thị và xuất giáo trình)
+        function computeMealPlan(weight, goal, activity, mealsPerDay, body) {
+            body = body || {};
+            const height = body.height >= 100 && body.height <= 230 ? body.height : null;
+            const age = body.age >= 14 && body.age <= 90 ? body.age : null;
+
+            let tdee, method;
+            if (height && age) {
+                const bmr = 10 * weight + 6.25 * height - 5 * age + (body.gender === 'female' ? -161 : 5);
+                tdee = Math.round(bmr * ACTIVITY_MULT[activity]);
+                method = 'mifflin';
+            } else {
+                tdee = Math.round(weight * ACTIVITY_FACTOR[activity]);
+                method = 'estimate';
+            }
+
+            let target = tdee;
+            if (goal === 'gain') target = tdee + 300;
+            else if (goal === 'lose') target = tdee - 500;
+            else target = tdee - 100;
+
+            // Không để calo mục tiêu xuống dưới mức tối thiểu an toàn
+            const minCal = body.gender === 'female' ? 1200 : 1500;
+            let floored = false;
+            if (target < minCal) { target = minCal; floored = true; }
+
+            const proteinTarget = Math.round(weight * (goal === 'lose' ? 2.2 : goal === 'gain' ? 2.0 : 2.1));
+
+            const meals = MEAL_TEMPLATES[mealsPerDay].map(m => {
+                const cal = Math.round(target * m.ratio);
+                const protein = Math.round(proteinTarget * m.ratio);
+                const items = (MEAL_RECIPES[m.name] || []).map(item => {
+                    let grams = Math.round(((cal * item.ratio) / item.kcal100) * 100 / 5) * 5;
+                    if (grams < 5) grams = 5;
+                    return { food: item.food, grams, unit: item.unit };
+                });
+                return { name: m.name, cal, protein, items };
+            });
+            return { tdee, target, proteinTarget, meals, method, floored };
+        }
+
+        function onBodyStatsChange() {
+            syncProfileFromUI();
+            calculateMealPlan();
+        }
+
+        function calculateMealPlan() {
+            const s = getCurrentStudent();
+            if (!s) return;
+            const weight = parseFloat(document.getElementById('student-weight').value) || s.weight || 68;
+            const goal = document.getElementById('student-goal').value;
+            const activity = document.getElementById('meal-activity').value;
+            const mealsPerDay = parseInt(document.getElementById('meal-count').value) || 4;
+            const body = {
+                gender: document.getElementById('student-gender').value,
+                height: parseFloat(document.getElementById('student-height').value) || null,
+                age: parseFloat(document.getElementById('student-age').value) || null
+            };
+
+            s.meal.activity = activity;
+            s.meal.mealsPerDay = mealsPerDay;
+
+            const plan = computeMealPlan(weight, goal, activity, mealsPerDay, body);
+
+            document.getElementById('res-tdee').innerText = plan.tdee + ' kcal';
+            document.getElementById('res-target-cal').innerText = plan.target + ' kcal';
+            document.getElementById('res-protein-2').innerText = plan.proteinTarget + ' g';
+
+            let note = plan.method === 'mifflin'
+                ? 'Tính theo công thức Mifflin-St Jeor (giới tính, chiều cao, tuổi, cân nặng) nhân hệ số vận động.'
+                : 'Đang ước tính theo cân nặng. Nhập chiều cao và tuổi ở phần hồ sơ để tính chính xác hơn.';
+            if (plan.floored) note += ' Calo mục tiêu đã được nâng lên mức tối thiểu an toàn (' + plan.target + ' kcal).';
+            document.getElementById('meal-method-note').innerText = note;
+
+            document.getElementById('meal-plan-list').innerHTML = plan.meals.map(m => {
+                const itemsHtml = m.items.map(it =>
+                    `<div class="flex justify-between"><span>${it.food}</span><span class="font-semibold text-slate-700">${it.grams}${it.unit}</span></div>`
+                ).join('');
+                return `<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="font-bold text-slate-800">${m.name}</div>
+                    <div class="text-emerald-700 font-semibold mb-1.5">${m.cal} kcal · ${m.protein}g đạm</div>
+                    <div class="text-slate-500 space-y-0.5">${itemsHtml}</div>
+                </div>`;
+            }).join('');
+
+            saveAppData();
+        }
+
+        // ===== Thư Viện Gợi Ý Bài Tập Theo Nhóm Cơ Cốt Lõi =====
+        const EXERCISE_LIBRARY = {
+            'Ngực': [
+                ['Bench Press', 'Đẩy ngực trên ghế phẳng'],
+                ['Incline Bench Press', 'Đẩy ngực dốc lên'],
+                ['Decline Bench Press', 'Đẩy ngực dốc xuống'],
+                ['Close-Grip Bench Press', 'Đẩy ngực hẹp tay (tập tay sau và ngực trong)'],
+                ['Smith Machine Bench Press', 'Đẩy ngực bằng máy Smith'],
+                ['Dumbbell Chest Press', 'Đẩy ngực bằng tạ đơn'],
+                ['Cable Chest Press', 'Đẩy ngực bằng cáp'],
+                ['Machine Chest Press', 'Đẩy ngực bằng máy'],
+                ['Push-up', 'Hít đất / Chống đẩy'],
+                ['Dips', 'Nhún xà kép (tập ngực và tay sau)'],
+                ['Cable Chest Fly', 'Ép ngực bằng cáp'],
+                ['Chest Fly', 'Ép ngực'],
+                ['Dumbbell Fly', 'Ép ngực bằng tạ đơn'],
+                ['Pec Deck Fly', 'Ép ngực bằng máy (Pec Deck)'],
+                ['Dumbbell Pullover', 'Gập ngực/kéo tạ đơn qua đầu']
+            ],
+            'Lưng / Xô': [
+                ['Lat Pulldown', 'Kéo cáp xuống tập xô/lưng'],
+                ['Seated Cable Row', 'Kéo cáp ngồi chèo thuyền (lưng giữa)'],
+                ['Barbell Row', 'Gập người kéo thanh đòn'],
+                ['Dumbbell Row', 'Kéo tạ đơn một tay'],
+                ['T-Bar Row', 'Kéo thanh chữ T'],
+                ['Pull-up', 'Hít xà đơn'],
+                ['Face Pull', 'Kéo cáp chạm mặt (vai sau và lưng trên)'],
+                ['Straight-Arm Pulldown', 'Kéo thẳng tay ép xô'],
+                ['Deadlift', 'Deadlift (kéo tạ từ mặt đất - toàn thân/lưng dưới)']
+            ],
+            'Vai': [
+                ['Overhead Press', 'Đẩy vai qua đầu'],
+                ['Dumbbell Shoulder Press', 'Đẩy vai bằng tạ đơn'],
+                ['Arnold Press', 'Đẩy vai kiểu Arnold'],
+                ['Lateral Raise', 'Dang tạ sang hai bên (vai giữa)'],
+                ['Front Raise', 'Đẩy/nâng tạ phía trước (vai trước)'],
+                ['Rear Delt Fly', 'Dang tạ tập vai sau'],
+                ['Upright Row', 'Kéo tạ thẳng đứng lên sát cằm'],
+                ['Shrugs', 'Nhún vai (cơ thang)']
+            ],
+            'Tay': [
+                ['Bicep Curl', 'Cuốn tạ tay trước'],
+                ['Barbell Curl', 'Cuốn tạ đòn tay trước'],
+                ['Hammer Curl', 'Cuốn tạ tay kiểu búa'],
+                ['Preacher Curl', 'Cuốn tạ trên ghế Scott (Preacher)'],
+                ['Concentration Curl', 'Cuốn tạ tập trung một tay'],
+                ['Triceps Pushdown', 'Cáp ép duỗi tay sau'],
+                ['Skull Crusher', 'Nằm đẩy thanh đòn gập tay (Skull Crusher)'],
+                ['Tricep Extension', 'Duỗi tay sau'],
+                ['Overhead Tricep Extension', 'Duỗi tay sau qua đầu']
+            ],
+            'Đùi / Mông': [
+                ['Squat', 'Gánh tạ đứng lên ngồi xuống (đùi trước)'],
+                ['Front Squat', 'Gánh tạ đằng trước'],
+                ['Goblet Squat', 'Ôm tạ đơn Squat'],
+                ['Leg Press', 'Đạp đùi máy'],
+                ['Hack Squat', 'Gánh đùi máy Hack'],
+                ['Bulgarian Split Squat', 'Chân bước trước bước sau (Bulgarian)'],
+                ['Lunges', 'Chùng chân bước tới/lui'],
+                ['Leg Extension', 'Ngồi đá đùi trước'],
+                ['Leg Curl', 'Nằm/ngồi cuộn đùi sau'],
+                ['Romanian Deadlift', 'Deadlift chân thẳng (tập đùi sau và mông)'],
+                ['Hip Thrust', 'Đẩy hông với tạ (tập mông)'],
+                ['Calf Raise', 'Nhón bắp chân']
+            ],
+            'Bụng': [
+                ['Cable Crunch', 'Gập bụng với cáp (bài tập siết cơ bụng trên rất hiệu quả)'],
+                ['Crunch', 'Gập bụng truyền thống / gập bụng cơ bản'],
+                ['Sit-Up', 'Nằm ngồi lên gập bụng'],
+                ['Lying Leg Raise', 'Nâng chân thẳng nằm sàn (chuyên tập bụng dưới)'],
+                ['Plank', 'Plank giữ thăng bằng (tăng sức mạnh cơ lõi/core)'],
+                ['Hanging Decline Rowing Crunches', 'Gập bụng treo người / ghế dốc kết hợp kéo cơ core']
+            ],
+            'Cardio': [
+                ['Treadmill Run / Walk', 'Chạy/đi bộ máy — điều chỉnh tốc độ & độ dốc theo Zone tim'],
+                ['Incline Treadmill Walk', 'Đi bộ dốc máy chạy (đốt mỡ nhẹ nhàng, ít áp lực khớp)'],
+                ['Cycling (Xe đạp)', 'Đạp xe cố định hoặc ngoài trời'],
+                ['Rowing Machine', 'Chèo thuyền máy — toàn thân, đốt calo cao'],
+                ['Elliptical', 'Máy tập hình elip (co giãn) — ít áp lực khớp gối'],
+                ['Stair Climber', 'Máy leo cầu thang'],
+                ['Jump Rope', 'Nhảy dây'],
+                ['HIIT Sprint Intervals', 'Chạy nước rút ngắt quãng (VD: 30s sprint / 60s đi bộ)'],
+                ['Zone 2 Steady Cardio', 'Cardio ổn định vùng nhịp tim Zone 2 (đốt mỡ hiếu khí)'],
+                ['Swimming (Bơi lội)', 'Bơi lội — toàn thân, ít áp lực khớp']
+            ]
+        };
+
+        function populateExerciseSuggestions() {
+            const sel = document.getElementById('modal-ex-suggest');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">— Chọn nhanh từ thư viện bài tập —</option>';
+            Object.keys(EXERCISE_LIBRARY).forEach(group => {
+                const og = document.createElement('optgroup');
+                og.label = group;
+                EXERCISE_LIBRARY[group].forEach(([enName, viName]) => {
+                    const opt = document.createElement('option');
+                    opt.value = enName + '|' + group;
+                    opt.innerText = enName + ' — ' + viName;
+                    og.appendChild(opt);
+                });
+                sel.appendChild(og);
+            });
+        }
+
+        function applyExerciseSuggestion(value) {
+            if (!value) return;
+            const [name, group] = value.split('|');
+            document.getElementById('modal-ex-name').value = name;
+            document.getElementById('modal-ex-group').value = group;
+            document.getElementById('modal-ex-suggest').value = '';
+        }
+
+        // Helper to format or construct DeltaBolic YouTube URL
+        function getYouTubeUrl(ex) {
+            if (ex.youtube && ex.youtube.trim() !== '') {
+                return ex.youtube.trim();
+            }
+            return 'https://www.youtube.com/results?search_query=' + encodeURIComponent('DeltaBolic ' + ex.name);
+        }
+
+        // Initialize App on DOM Load
+        document.addEventListener('DOMContentLoaded', () => {
+            appData = loadAppData();
+            if (!appData.students[appData.currentStudentId]) {
+                appData.currentStudentId = Object.keys(appData.students)[0];
+            }
+            initChart();
+            initWeightChart();
+            initLiftChart();
+            initMeasureChart();
+            setDefaultDates();
+            populateExerciseSuggestions();
+            renderStudentSelector();
+            loadStudentIntoUI();
+            saveAppData();
+        });
+
+        // Update Student Header Display
+        function updateStudentHeader() {
+            const name = document.getElementById('student-name').value.trim() || 'Học Viên';
+            const goalElem = document.getElementById('student-goal');
+            const goalText = goalElem.options[goalElem.selectedIndex].text;
+            const weight = document.getElementById('student-weight').value || '68';
+
+            document.getElementById('header-student-name').innerText = `[${name}]`;
+            document.getElementById('calc-student-disp').innerText = name;
+            document.getElementById('calc-weight-disp').innerText = weight + ' kg';
+            document.getElementById('calc-goal-disp').innerText = goalText.split('(')[0];
+            syncProfileFromUI();
+        }
+
+        // Custom Modal Confirmation System
+        function showConfirmModal(title, message, onConfirmAction) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = message;
+            pendingConfirmCallback = onConfirmAction;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            pendingConfirmCallback = null;
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        function executeConfirmAction() {
+            if (typeof pendingConfirmCallback === 'function') {
+                pendingConfirmCallback();
+            }
+            closeConfirmModal();
+        }
+
+        // Switch between Option 1 and Option 2
+        function switchOption(optionKey) {
+            const s = getCurrentStudent();
+            currentOptionKey = optionKey;
+            currentDayIndex = 0;
+            s.currentOption = optionKey;
+
+            const btn1 = document.getElementById('btn-option1');
+            const btn2 = document.getElementById('btn-option2');
+
+            if (!s.programs[optionKey]) {
+                s.programs[optionKey] = JSON.parse(JSON.stringify(optionKey === 'option1' ? defaultDataOption1 : defaultDataOption2));
+            }
+            activeData = s.programs[optionKey];
+
+            if (optionKey === 'option1') {
+                btn1.className = "px-3.5 py-2 text-xs font-bold rounded-lg transition-all shadow-sm bg-emerald-500 text-slate-950";
+                btn2.className = "px-3.5 py-2 text-xs font-bold rounded-lg transition-all text-slate-300 hover:text-white";
+            } else {
+                btn2.className = "px-3.5 py-2 text-xs font-bold rounded-lg transition-all shadow-sm bg-indigo-500 text-white";
+                btn1.className = "px-3.5 py-2 text-xs font-bold rounded-lg transition-all text-slate-300 hover:text-white";
+            }
+
+            renderOptionDetails();
+            saveAppData();
+            showToast("Đã chuyển sang " + (optionKey === 'option1' ? 'Phương án 1' : 'Phương án 2'));
+        }
+
+        // Reset Current Option to default preset
+        function resetCurrentOption() {
+            showConfirmModal(
+                "Khôi Phục Mặc Định",
+                "Bạn có chắc chắn muốn khôi phục lịch tập này về cài đặt mặc định ban đầu?",
+                () => {
+                    const s = getCurrentStudent();
+                    const base = currentOptionKey === 'option1' ? defaultDataOption1 : defaultDataOption2;
+                    const fresh = genderAdjustedProgram(base, s.gender);
+                    s.programs[currentOptionKey] = fresh;
+                    activeData = fresh;
+                    renderOptionDetails();
+                    saveAppData();
+                    showToast("🔄 Đã khôi phục mặc định!");
+                }
+            );
+        }
+
+        // Render Option Header, Stats, Tabs, Table & Chart
+        function renderOptionDetails() {
+            // Update Overview Header
+            document.getElementById('plan-badge').innerText = activeData.badge;
+            document.getElementById('plan-title').innerText = activeData.title;
+            document.getElementById('plan-desc').innerText = activeData.desc;
+
+            // Calculate Metrics
+            let totalEx = 0;
+            let totalSets = 0;
+            let gymCount = 0;
+            let cardioCount = 0;
+
+            activeData.days.forEach(day => {
+                totalEx += day.exercises.length;
+                let daySets = 0;
+                let isCardioDay = false;
+                
+                day.exercises.forEach(ex => {
+                    daySets += parseInt(ex.sets) || 1;
+                    if (ex.group === 'Cardio') isCardioDay = true;
+                });
+
+                totalSets += daySets;
+                if (day.exercises.length > 0 && !day.title.includes('Nghỉ')) {
+                    if (isCardioDay && day.exercises.length <= 2) {
+                        cardioCount++;
+                    } else {
+                        gymCount++;
+                    }
+                }
+            });
+
+            document.getElementById('stat-total-ex').innerText = totalEx + " Bài";
+            document.getElementById('stat-total-sets').innerText = totalSets + " Sets";
+            document.getElementById('stat-gym-days').innerText = gymCount + " Buổi";
+            document.getElementById('stat-cardio-days').innerText = cardioCount + " Buổi";
+
+            // Render Day Tabs
+            const tabsContainer = document.getElementById('day-tabs-container');
+            tabsContainer.innerHTML = '';
+            
+            activeData.days.forEach((day, index) => {
+                const isActive = index === currentDayIndex;
+                const tabBtn = document.createElement('button');
+                tabBtn.onclick = () => selectDay(index);
+                tabBtn.className = `px-4 py-2 text-xs font-semibold rounded-xl transition-all flex flex-col items-start gap-0.5 border ${
+                    isActive 
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-md' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                }`;
+                tabBtn.innerHTML = `
+                    <span class="font-bold">${day.dayName}</span>
+                    <span class="text-[10px] opacity-80 font-normal truncate max-w-[100px]">${day.title.split(':')[1] || day.title}</span>
+                `;
+                tabsContainer.appendChild(tabBtn);
+            });
+
+            // Render Selected Day Content
+            renderCurrentDay();
+
+            // Update Chart Data
+            updateVolumeChart();
+        }
+
+        // Select active day
+        function selectDay(index) {
+            currentDayIndex = index;
+            renderOptionDetails();
+        }
+
+        // Render current selected day details
+        function renderCurrentDay() {
+            const day = activeData.days[currentDayIndex];
+            document.getElementById('current-day-name').innerText = day.dayName + " - " + day.title;
+            document.getElementById('current-day-focus').innerText = "Trọng tâm: " + day.focus;
+            document.getElementById('current-day-count').innerText = day.exercises.length + " Bài tập";
+            
+            // Labels inside extra action buttons
+            const addBtnLabel = document.getElementById('add-btn-day-label');
+            if (addBtnLabel) addBtnLabel.innerText = day.dayName;
+
+            const clearBtnLabel = document.getElementById('clear-btn-day-label');
+            if (clearBtnLabel) clearBtnLabel.innerText = day.dayName;
+
+            // Notes & Memo
+            document.getElementById('day-notes-box').innerHTML = `
+                <p class="font-bold text-slate-700">📌 Chỉ đạo từ Coach Phan Văn Nhựt:</p>
+                <p class="text-slate-600 leading-relaxed">${day.notes}</p>
+            `;
+            document.getElementById('user-day-memo').value = day.memo || '';
+
+            // Table Content
+            const tbody = document.getElementById('exercise-list-tbody');
+            tbody.innerHTML = '';
+
+            if (day.exercises.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">Chưa có bài tập nào cho ngày này. Hãy bấm <b>"Thêm bài tập"</b> để tạo danh sách mới.</td></tr>`;
+                return;
+            }
+
+            day.exercises.forEach((ex, idx) => {
+                const ytUrl = getYouTubeUrl(ex);
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-medium text-slate-800">
+                        <div>${ex.name}</div>
+                        <span class="text-[10px] inline-block px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded mt-0.5 font-semibold">${ex.group}</span>
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <input type="number" min="1" max="10" value="${ex.sets}" onchange="updateExerciseInline(${idx}, 'sets', this.value)" class="w-12 text-center text-xs py-1 border border-slate-200 rounded font-semibold bg-white focus:ring-1 focus:ring-emerald-500 outline-none">
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <input type="text" value="${ex.reps}" onchange="updateExerciseInline(${idx}, 'reps', this.value)" class="w-24 text-center text-xs py-1 border border-slate-200 rounded font-medium bg-white focus:ring-1 focus:ring-emerald-500 outline-none">
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <input type="text" value="${ex.weight}" onchange="updateExerciseInline(${idx}, 'weight', this.value)" class="w-20 text-center text-xs py-1 border border-slate-200 rounded font-medium bg-white focus:ring-1 focus:ring-emerald-500 outline-none">
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <a href="${ytUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-bold rounded-lg transition-all shadow-sm" title="Xem video hướng dẫn form kỹ thuật chuẩn từ DeltaBolic (Andrew Kwong)">
+                            <span>▶️</span> DeltaBolic
+                        </a>
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="openEditExerciseModal(${idx})" class="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all" title="Chỉnh sửa bài tập & link YouTube DeltaBolic">
+                                ✏️
+                            </button>
+                            <button onclick="deleteExercise(${idx})" class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded transition-all" title="Xóa bài tập này">
+                                🗑️
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            renderCompletionStatus();
+        }
+
+        // Inline Update Sets/Reps/Weight
+        function updateExerciseInline(index, field, value) {
+            activeData.days[currentDayIndex].exercises[index][field] = value;
+            updateVolumeChart();
+            saveAppData();
+            showToast("Đã cập nhật thông tin bài tập!");
+        }
+
+        // Save Day Memo
+        function saveDayMemo() {
+            const val = document.getElementById('user-day-memo').value;
+            activeData.days[currentDayIndex].memo = val;
+            saveAppData();
+            const toast = document.getElementById('memo-saved-toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+
+        // Single Exercise Delete Function
+        function deleteExercise(index) {
+            const ex = activeData.days[currentDayIndex].exercises[index];
+            if (!ex) return;
+            
+            showConfirmModal(
+                "Xóa Bài Tập",
+                `Bạn có chắc chắn muốn xóa bài tập "${ex.name}" khỏi ${activeData.days[currentDayIndex].dayName}?`,
+                () => {
+                    activeData.days[currentDayIndex].exercises.splice(index, 1);
+                    renderOptionDetails();
+                    saveAppData();
+                    showToast(`🗑️ Đã xóa "${ex.name}" thành công!`);
+                }
+            );
+        }
+
+        // Delete Current Exercise from inside Edit Modal
+        function deleteCurrentExerciseFromModal() {
+            const editIdx = parseInt(document.getElementById('modal-edit-index').value);
+            if (editIdx >= 0 && editIdx < activeData.days[currentDayIndex].exercises.length) {
+                const ex = activeData.days[currentDayIndex].exercises[editIdx];
+                showConfirmModal(
+                    "Xóa Bài Tập",
+                    `Bạn có chắc muốn xóa bài tập "${ex.name}" không?`,
+                    () => {
+                        activeData.days[currentDayIndex].exercises.splice(editIdx, 1);
+                        closeExerciseModal();
+                        renderOptionDetails();
+                        saveAppData();
+                        showToast(`🗑️ Đã xóa "${ex.name}"!`);
+                    }
+                );
+            }
+        }
+
+        // Clear All Exercises for Active Day
+        function clearDayExercises() {
+            const dayName = activeData.days[currentDayIndex].dayName;
+            const count = activeData.days[currentDayIndex].exercises.length;
+            
+            if (count === 0) {
+                showToast("⚠️ Ngày này hiện chưa có bài tập nào!");
+                return;
+            }
+
+            showConfirmModal(
+                `Xóa Tất Cả Bài Tập ${dayName}`,
+                `Bạn có chắc chắn muốn xóa TOÀN BỘ ${count} bài tập của ${dayName}?`,
+                () => {
+                    activeData.days[currentDayIndex].exercises = [];
+                    renderOptionDetails();
+                    saveAppData();
+                    showToast(`🗑️ Đã xóa sạch danh sách bài tập của ${dayName}!`);
+                }
+            );
+        }
+
+        // Modal Form Functions
+        function openAddExerciseModal() {
+            document.getElementById('modal-title').innerText = "Thêm Bài Tập Mới vào " + activeData.days[currentDayIndex].dayName;
+            document.getElementById('modal-edit-index').value = "-1";
+            document.getElementById('modal-ex-suggest').value = "";
+            document.getElementById('modal-ex-name').value = "";
+            document.getElementById('modal-ex-sets').value = "3";
+            document.getElementById('modal-ex-reps').value = "10 - 12 reps";
+            document.getElementById('modal-ex-weight').value = "Dumbbell";
+            document.getElementById('modal-ex-youtube').value = "";
+            
+            document.getElementById('modal-btn-delete').classList.add('hidden');
+            document.getElementById('exercise-modal').classList.remove('hidden');
+        }
+
+        function openEditExerciseModal(index) {
+            const ex = activeData.days[currentDayIndex].exercises[index];
+            document.getElementById('modal-title').innerText = "Chỉnh Sửa Bài Tập & Video DeltaBolic";
+            document.getElementById('modal-edit-index').value = index;
+            document.getElementById('modal-ex-suggest').value = "";
+            document.getElementById('modal-ex-name').value = ex.name;
+            document.getElementById('modal-ex-group').value = ex.group;
+            document.getElementById('modal-ex-sets').value = ex.sets;
+            document.getElementById('modal-ex-reps').value = ex.reps;
+            document.getElementById('modal-ex-weight').value = ex.weight;
+            document.getElementById('modal-ex-youtube').value = ex.youtube || "";
+            
+            document.getElementById('modal-btn-delete').classList.remove('hidden');
+            document.getElementById('exercise-modal').classList.remove('hidden');
+        }
+
+        function closeExerciseModal() {
+            document.getElementById('exercise-modal').classList.add('hidden');
+        }
+
+        function handleSaveExercise(e) {
+            e.preventDefault();
+            const editIdx = parseInt(document.getElementById('modal-edit-index').value);
+            const youtubeInput = document.getElementById('modal-ex-youtube').value.trim();
+
+            const newEx = {
+                name: document.getElementById('modal-ex-name').value,
+                group: document.getElementById('modal-ex-group').value,
+                sets: parseInt(document.getElementById('modal-ex-sets').value) || 3,
+                reps: document.getElementById('modal-ex-reps').value,
+                weight: document.getElementById('modal-ex-weight').value,
+                youtube: youtubeInput
+            };
+
+            if (editIdx >= 0) {
+                activeData.days[currentDayIndex].exercises[editIdx] = newEx;
+                showToast("Đã cập nhật bài tập!");
+            } else {
+                activeData.days[currentDayIndex].exercises.push(newEx);
+                showToast("Đã thêm bài tập mới!");
+            }
+
+            closeExerciseModal();
+            renderOptionDetails();
+            saveAppData();
+        }
+
+        // Chart.js Setup & Dynamic Updates
+        function initChart() {
+            const ctx = document.getElementById('volumeChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Ngực', 'Vai', 'Lưng / Xô', 'Đùi / Mông', 'Tay', 'Bụng', 'Cardio'],
+                    datasets: [{
+                        label: 'Số Sets / Tuần',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                        borderColor: '#10b981',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e2e8f0' },
+                            grid: { color: '#f1f5f9' },
+                            pointLabels: {
+                                font: { size: 10, family: 'Inter', weight: '600' },
+                                color: '#475569'
+                            },
+                            ticks: { display: false, stepSize: 3 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + ' sets/tuần';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateVolumeChart() {
+            if (!myChart) return;
+
+            const groups = { 'Ngực': 0, 'Vai': 0, 'Lưng / Xô': 0, 'Đùi / Mông': 0, 'Tay': 0, 'Bụng': 0, 'Cardio': 0 };
+
+            activeData.days.forEach(day => {
+                day.exercises.forEach(ex => {
+                    const sets = parseInt(ex.sets) || 1;
+                    if (groups[ex.group] !== undefined) {
+                        groups[ex.group] += sets;
+                    } else {
+                        groups['Ngực'] += sets;
+                    }
+                });
+            });
+
+            myChart.data.datasets[0].data = [
+                groups['Ngực'],
+                groups['Vai'],
+                groups['Lưng / Xô'],
+                groups['Đùi / Mông'],
+                groups['Tay'],
+                groups['Bụng'],
+                groups['Cardio']
+            ];
+
+            if (currentOptionKey === 'option2') {
+                myChart.data.datasets[0].backgroundColor = 'rgba(99, 102, 241, 0.25)';
+                myChart.data.datasets[0].borderColor = '#6366f1';
+                myChart.data.datasets[0].pointBackgroundColor = '#6366f1';
+            } else {
+                myChart.data.datasets[0].backgroundColor = 'rgba(16, 185, 129, 0.25)';
+                myChart.data.datasets[0].borderColor = '#10b981';
+                myChart.data.datasets[0].pointBackgroundColor = '#10b981';
+            }
+
+            myChart.update();
+        }
+
+        // Nutrition Calculator Logic
+        function calculateNutrition() {
+            const weight = parseFloat(document.getElementById('student-weight').value) || 68;
+            const goal = document.getElementById('student-goal').value;
+
+            let minProteinRatio = 1.8;
+            let maxProteinRatio = 2.2;
+
+            if (goal === 'gain') {
+                minProteinRatio = 1.8;
+                maxProteinRatio = 2.2;
+            } else if (goal === 'lose') {
+                minProteinRatio = 2.0;
+                maxProteinRatio = 2.4;
+            } else {
+                minProteinRatio = 1.9;
+                maxProteinRatio = 2.3;
+            }
+
+            const minProtein = Math.round(weight * minProteinRatio);
+            const maxProtein = Math.round(weight * maxProteinRatio);
+            const minWater = (weight * 0.04).toFixed(1);
+            const maxWater = (weight * 0.05).toFixed(1);
+
+            document.getElementById('res-protein').innerText = `${minProtein} - ${maxProtein} g`;
+            document.getElementById('res-water').innerText = `${minWater} - ${maxWater} Lít`;
+            if (appData) calculateMealPlan();
+        }
+
+        // Dựng nội dung giáo trình đầy đủ cho học viên
+        function buildPlanText() {
+            const s = getCurrentStudent();
+            const studentName = document.getElementById('student-name').value.trim() || 'Học Viên';
+            const startDate = document.getElementById('student-start-date').value.trim() || 'Tuần Này';
+            const coachNote = document.getElementById('coach-special-note').value.trim();
+            const gender = document.getElementById('student-gender').value;
+            const goal = document.getElementById('student-goal').value;
+            const weight = parseFloat(document.getElementById('student-weight').value) || s.weight || 68;
+            const goalNames = { gain: 'Tăng cơ bắp', lose: 'Giảm mỡ giữ cơ', recomp: 'Tăng cơ giảm mỡ đồng thời' };
+
+            let text = `=======================================\n`;
+            text += `🏋️ GIÁO TRÌNH TẬP LUYỆN CÁ NHÂN HÓA 6 BUỔI/TUẦN\n`;
+            text += `👑 Huấn Luyện Viên: COACH PHAN VĂN NHỰT\n`;
+            const hVal = parseFloat(document.getElementById('student-height').value);
+            const aVal = parseFloat(document.getElementById('student-age').value);
+            text += `🎓 Học Viên: ${studentName} (${gender === 'female' ? 'Nữ' : 'Nam'}) · ${weight} kg` + (hVal ? ` · ${hVal} cm` : '') + (aVal ? ` · ${aVal} tuổi` : '') + `\n`;
+            text += `🎯 Mục Tiêu: ${goalNames[goal] || goal}\n`;
+            text += `📅 Áp Dụng: ${startDate}\n`;
+            text += `📌 Chương Trình: ${activeData.title}\n`;
+            if (coachNote) text += `💬 Lời Nhắn Từ Coach: "${coachNote}"\n`;
+            text += `=======================================\n\n`;
+
+            activeData.days.forEach(day => {
+                text += `► ${day.dayName.toUpperCase()}: ${day.title}\n`;
+                text += `   [Trọng Tâm: ${day.focus}]\n`;
+                if (day.exercises.length === 0) {
+                    text += `   (Chưa xếp bài tập)\n`;
+                } else {
+                    day.exercises.forEach((ex, i) => {
+                        text += `   ${i + 1}. ${ex.name} | ${ex.sets} sets x ${ex.reps} | Tạ: ${ex.weight}\n`;
+                        text += `      ▶ Video Form DeltaBolic (Andrew Kwong): ${getYouTubeUrl(ex)}\n`;
+                    });
+                }
+                if (day.notes) text += `   💡 Lưu ý kỹ thuật: ${day.notes}\n`;
+                if (day.memo) text += `   📝 Phản hồi học viên: ${day.memo}\n`;
+                text += `---------------------------------------\n`;
+            });
+
+            const activity = document.getElementById('meal-activity').value;
+            const mealsPerDay = parseInt(document.getElementById('meal-count').value) || 4;
+            const plan = computeMealPlan(weight, goal, activity, mealsPerDay, { gender, height: hVal || null, age: aVal || null });
+
+            text += `\n🥗 DINH DƯỠNG MỤC TIÊU MỖI NGÀY:\n`;
+            text += `- Calo mục tiêu: ~${plan.target} kcal (TDEE ước tính ${plan.tdee} kcal)\n`;
+            text += `- Protein: ${document.getElementById('res-protein').innerText}\n`;
+            text += `- Nước Uống: ${document.getElementById('res-water').innerText}\n`;
+            text += `- Giấc Ngủ: 7.5 - 8.5 tiếng/đêm\n\n`;
+
+            text += `🍽️ GIÁO ÁN BỮA ĂN (${mealsPerDay} bữa/ngày):\n`;
+            plan.meals.forEach(m => {
+                text += `• ${m.name} — ${m.cal} kcal · ${m.protein}g đạm\n`;
+                m.items.forEach(it => { text += `    - ${it.food}: ${it.grams}${it.unit}\n`; });
+            });
+            text += `(Số gam mang tính ước tính tham khảo, có thể điều chỉnh theo phản hồi cơ thể.)\n`;
+
+            if (s.weeklyLogs.length > 0) {
+                text += `\n📈 TIẾN ĐỘ THEO TUẦN:\n`;
+                s.weeklyLogs.forEach(l => {
+                    text += `- Tuần ${l.week} (${l.date}): ${l.weight}kg${l.compound ? ' · Tổng tạ 3 bài chính: ' + l.compound + 'kg' : ''}${l.note ? ' · ' + l.note : ''}\n`;
+                });
+                if (s.weeklyLogs.length > 1) {
+                    const diff = (s.weeklyLogs[s.weeklyLogs.length - 1].weight - s.weeklyLogs[0].weight).toFixed(1);
+                    text += `→ Thay đổi cân nặng từ Tuần 1: ${diff > 0 ? '+' : ''}${diff} kg\n`;
+                }
+            }
+
+            const ad = computeAdherence(s);
+            if (ad.total > 0) {
+                text += `\n✅ CHUYÊN CẦN: tuần này ${ad.thisCount}/${WEEKLY_TARGET} buổi · tổng ${ad.total} ngày đã tập · chuỗi ${ad.streak} tuần đạt ≥${WEEK_OK}/${WEEKLY_TARGET} buổi\n`;
+            }
+            const lifts = liftSummary(s).filter(x => x.sessions > 1);
+            if (lifts.length > 0) {
+                text += `\n🏋️ TIẾN BỘ MỨC TẠ:\n`;
+                lifts.slice().sort((a, b) => b.diff - a.diff).slice(0, 10).forEach(x => {
+                    text += `- ${x.name}: ${x.first}kg → ${x.last}kg (${x.diff > 0 ? '+' : ''}${x.diff}kg)\n`;
+                });
+            }
+            const ms = measureSummary(s);
+            if (ms.length > 0) {
+                text += `\n📏 SỐ ĐO VÒNG (cm):\n`;
+                ms.forEach(x => {
+                    text += `- ${x.label}: ` + (x.n > 1 ? `${x.first} → ${x.last} (${x.diff > 0 ? '+' : ''}${x.diff})` : `${x.last}`) + `\n`;
+                });
+            }
+
+            text += `\n💪 CHÚC ${studentName.toUpperCase()} TẬP LUYỆN TỐT & ĐẠT MỤC TIÊU TỐI ĐA!`;
+            return text;
+        }
+
+        // Copy Summary Plan formatted for Student
+        function exportPlanSummary() {
+            const studentName = document.getElementById('student-name').value.trim() || 'Học Viên';
+            const text = buildPlanText();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(`📋 Đã sao chép giáo trình đầy đủ của ${studentName}!`);
+                }).catch(() => {
+                    showToast("⚠️ Trình duyệt chặn sao chép, hãy dùng nút In / Lưu PDF!");
+                });
+            } else {
+                showToast("⚠️ Trình duyệt chặn sao chép, hãy dùng nút In / Lưu PDF!");
+            }
+        }
+
+        // In hoặc lưu PDF: mở cửa sổ giáo trình rồi gọi hộp thoại in
+        function printPlan() {
+            const studentName = document.getElementById('student-name').value.trim() || 'Học Viên';
+            const safe = buildPlanText().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const w = window.open('', '_blank');
+            if (!w) {
+                showToast('⚠️ Trình duyệt chặn cửa sổ in, hãy cho phép popup rồi thử lại!');
+                return;
+            }
+            w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Giáo trình - ' + studentName.replace(/</g, '&lt;') + '</title>' +
+                '<style>body{font-family:system-ui,Arial,sans-serif;margin:24px;color:#0f172a}pre{white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.55;font-family:inherit}</style></head><body><pre>' +
+                safe + '</pre></body></html>');
+            w.document.close();
+            w.focus();
+            setTimeout(() => w.print(), 300);
+        }
+
+        // Toast Helper
+        function showToast(message) {
+            const toast = document.getElementById('toast-msg');
+            document.getElementById('toast-text').innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
